@@ -101,7 +101,10 @@ class Leftquery(object):
                 msg = '[' + threading.current_thread().getName() + '] ' + date + ' ' + from_station + '-' + to_station + ' 第[' + str(self.n) + ']次查询成功!'
                 print('\n' + '*' * 6 + msg + '*' * 6 + '\n')
                 cmdTxt = 'log:' + msg
-                client.sendall(cmdTxt.encode(encoding))
+                try:
+                    client.sendall(cmdTxt.encode(encoding))
+                except:
+                    pass
                 # 打印出所有车次信息
                 num = 1  # 用于给车次编号,方便选择要购买的车次
                 for i in result:
@@ -156,7 +159,7 @@ class Leftquery(object):
                 else:
                     time_out_cdn.update({host : 1})
             println('查询余票信息异常...')
-            print(e)
+#            print(e)
 #            exit()
 
 
@@ -917,8 +920,12 @@ def order(bkInfo):
                                 playaudio(r'audio/Lively.mp3')
                                 println('正在尝试使用邮件代理发送...')
                                 cmdTxt = 'addmailtask:' + bkInfo.email + '|' + subject + '|' + success_info
-                                client.sendall(cmdTxt.encode(encoding))
-                                resp = bytes.decode(client.recv(1024), encoding)
+                                try:
+                                    client.sendall(cmdTxt.encode(encoding))
+                                    resp = bytes.decode(client.recv(1024), encoding)
+                                except:
+                                    pass 
+
                             break
                         else:
                             if res['msg'].find('余票不足') > -1 or res['msg'].find('排队人数现已超过余票数') > -1:
@@ -1008,9 +1015,10 @@ def playaudio(path):
 def println(msg):
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ': ' + str(msg))
     cmdTxt = 'log:' + str(msg)
+    socketsend(cmdTxt)
 #    client.send(cmdTxt.encode(encoding))
-    thread = threading.Thread(target=socketsend,name='Thread-Socket-Send',args=(cmdTxt,))
-    thread.start()
+#    thread = threading.Thread(target=socketsend,name='Thread-Socket-Send',args=(cmdTxt,))
+#    thread.start()
 def socketsend(data):
     try:    
         client.sendall(data.encode(encoding))
