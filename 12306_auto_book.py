@@ -1093,12 +1093,7 @@ def task():
                 time.sleep(round(1 + random.uniform(0, 1), 2))
     # 移除已经删除的任务线程
     for info_key in thread_list:
-        remove = True
-        for task_key in booking_list:
-            if info_key == task_key:
-                remove = False
-                break
-        if remove:
+        if info_key not in booking_list:
             thread_list.update({info_key : False})
 
 def cdn_req(cdn):
