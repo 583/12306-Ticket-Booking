@@ -146,6 +146,8 @@ class Leftquery(object):
 #                    else:
 #                        print(str(num) + '.' + info[3] + '车次列车运行图调整,暂停发售')
                     num += 1
+            if host in time_out_cdn:
+                time_out_cdn.pop(host)
             return result
         except Exception as e:
             if host != 'kyfw.12306.cn' and str(e).find('timeout') > -1:
