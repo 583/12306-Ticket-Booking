@@ -83,7 +83,9 @@ class CDNProxy:
                     jsonRes = demjson.decode(res[0])
 #                    print(jsonRes)
                     if jsonRes['state'] == 1:
-                        cdn_list.append(jsonRes['result']['ip'])
+                        ip = jsonRes['result']['ip']
+                        if ip not in cdn_list:
+                            cdn_list.append()
 #                        print(jsonRes['result']['ip'])
             except:
 #                print(e)
