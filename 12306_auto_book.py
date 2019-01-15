@@ -577,6 +577,8 @@ class Cancelorder(Login, Order):
                     if 'waitTime' in orderCacheDTO:
                         time.sleep(int(orderCacheDTO['waitTime']) * 2)
                         html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
+                    else:
+                        time.sleep(5)
                 if html_orderinfo and 'orderDBList' in html_orderinfo['data']:  
                     order_info = html_orderinfo['data']['orderDBList'][0]
                     pass_list = order_info['array_passser_name_page']
