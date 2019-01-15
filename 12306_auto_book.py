@@ -784,6 +784,7 @@ def order(bkInfo):
                             cddt_seat_keys.append(k)
                             break
                 trains_idx = []
+                temp_trains_idx = []
                 num = 1
                 for i in result:
                     info = i.split('|')
@@ -823,8 +824,10 @@ def order(bkInfo):
                                             # 保证在区间内
                                             if t1 >= t2 and t3 <= t4 and (t3-t1) >= ts:
         #                                            print(info[3])
-                                                trains_idx.append(num)
+                                                temp_trains_idx.append(num)
                     num += 1
+                if temp_trains_idx:
+                    trains_idx.extend(temp_trains_idx)
                 if len(trains_idx) > 0:
                     lock.acquire()
 #                    if booking_now[bkInfo.group] > int(bkInfo.rank):
