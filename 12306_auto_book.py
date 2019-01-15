@@ -314,7 +314,11 @@ class Order(object):
         if html_order['status'] == True:
             println('尝试提交订单...')
         else:
-            println('提交订单失败!')
+            msg = '提交订单失败! '
+            if  'messages' in html_order:
+                msg = msg + html_order['messages'][0]
+            println(msg)
+        return html_order
 #            exit()
 
     def price(self):
@@ -568,7 +572,7 @@ class Cancelorder(Login, Order):
                 if 'orderCacheDTO' in html_orderinfo['data']:
                     orderCacheDTO = html_orderinfo['data']['orderCacheDTO'][0]
                     if 'waitTime' in orderCacheDTO:
-                        time.sleep(int(orderCacheDTO['waitTime']))
+                        time.sleep(int(orderCacheDTO['waitTime']) * 2)
                         html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
                 if html_orderinfo and 'orderDBList' in html_orderinfo['data']:  
                     order_info = html_orderinfo['data']['orderDBList'][0]
@@ -838,6 +842,10 @@ def order(bkInfo):
                         login.captcha(answer_num)
                         login.login()
                         auth_res = order.auth()
+                        
+                        cancelorder = Cancelorder()
+                        res = cancelorder.orderinfo()
+                        
                 for train_idx in trains_idx:
                     t_no = result[int(train_idx) - 1].split('|')[3]
                     train_tip = date + '-' + from_station + '-' + to_station + '-' + t_no
@@ -849,7 +857,12 @@ def order(bkInfo):
                     println('正在抢 ' + date + '：[' + t_no + ']次 ' + from_station + '--->' + to_station)
                     train_number = train_idx
                     # 提交订单
-                    order.order(result, train_number, from_station, to_station, date)
+                    o_res = order.order(result, train_number, from_station, to_station, date)
+                    if o_res['status'] is not True and 'messages' in o_res:
+                        if o_res['messages'][0].find('有未处理的订单') > -1 or o_res['messages'][0].find('未完成订单') > -1 :
+                            println('您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。')
+                            booking_list[info_key] = True
+                            break
                     # 检查订单
                     content = order.price()  # 打印出票价信息
                     passengers = order.passengers(content[8])  # 打印乘客信息
@@ -1107,7 +1120,7 @@ def cdn_req(cdn):
         if time_out_cdn[to_cdn] > 5 and to_cdn in cdn_list:
             cdn_list.remove(to_cdn)
             time_out_cdn[to_cdn] = 0
-    print(u"所有cdn解析完成...")
+    print(u"所有cdn解析完成, 目前可用[" + str(len(cdn_list)) + "]个")
 
 def cdn_certification():
     """

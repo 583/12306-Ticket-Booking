@@ -97,7 +97,7 @@ class CDNProxy:
                 for ip in cdn_list:
                     if ip not in cdn_file:
 #                        print('write' + ip)
-                        f.write('\n' + ip)
+                        f.write(ip + '\n')
                         n += 1
                 f.close()
                 self.println('更新cdn列表完毕，新增[{}]个。'.format(n))
@@ -124,11 +124,30 @@ class CDNProxy:
                 if i and 'kyfw.12306.cn:443' not in i:
                     cdn.append(i.replace('\n', ''))
             return cdn
-
-
+    def write_cdn_file(self):
+        cdn_list = self.open_cdn_file()
+        cdn_list_path = os.path.join(os.path.dirname(__file__), '../cdn_list')
+        url_cdn_path = os.path.join(os.path.dirname(__file__), '../url_cdn_list')
+        if os.path.exists(url_cdn_path):
+            with open(url_cdn_path, 'r') as f:
+                for i in f.readlines():
+                    # print(i.replace("\n", ""))
+                    if i and 'kyfw.12306.cn:443' not in i:
+                        cdn_list.append(i.replace('\n', '')[7:-4])
+        cdn_list = list(set(cdn_list))
+#        temp_cdn_path = os.path.join(os.path.dirname(__file__), '../temp_cdn_list')
+        f = open(cdn_list_path, 'w')
+        for ip in cdn_list:
+            if len(ip) > 0:
+                f.write(ip + '\n')
+        f.close()
+#        os.remove(cdn_list_path)
+#        os.rename(temp_cdn_path, cdn_list_path)
+        
 if __name__ == '__main__':
     cdn = CDNProxy()
-    t = threading.Thread(target=cdn.update_cdn_list(), args=(1,))
-    t.setDaemon(True)
-    # t2 = threading.Thread(target=self.set_cdn, args=())
-    t.start()
+#    t = threading.Thread(target=cdn.update_cdn_list(), args=())
+#    t.setDaemon(True)
+#    # t2 = threading.Thread(target=self.set_cdn, args=())
+#    t.start()
+    cdn.write_cdn_file()
