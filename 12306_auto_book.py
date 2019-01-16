@@ -869,6 +869,21 @@ def order(bkInfo):
                     if o_res['status'] is not True and 'messages' in o_res:
                         if o_res['messages'][0].find('有未处理的订单') > -1 or o_res['messages'][0].find('未完成订单') > -1 :
                             println('您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。')
+                            subject = '自助订票系统--任务取消通知'
+                            success_info = '<div>您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>当前抢票任务信息如下：</div>'
+                            success_info = success_info + '[' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车]</div>'
+                            success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
+                            email = SendEmail()
+                            send_res = email.send(bkInfo.email, subject, success_info)
+                            playaudio(r'audio/HeartsDesire.mp3')
+                            if send_res == False:
+                                println('正在尝试使用邮件代理发送...')
+                                cmdTxt = 'addmailtask:' + bkInfo.email + '|' + subject + '|' + success_info
+                                try:
+                                    client.sendall(cmdTxt.encode(encoding))
+                                    resp = bytes.decode(client.recv(1024), encoding)
+                                except:
+                                    pass
                             booking_list[info_key] = True
                             break
                     # 检查订单
@@ -885,7 +900,7 @@ def order(bkInfo):
                                 if p_idx != 1:
                                     passengers_name = passengers_name + ','
                                 passengers_name = passengers_name + str(p_idx)
-                                p_name = p_name + p['passenger_name']+'(' + p['passenger_id_no'] + ')'
+                                p_name = p_name + p['passenger_name']+'(' + p['passenger_id_no'][0:-4] + 'XXXX)'
                                 break
                             else:
                                p_idx += 1 
