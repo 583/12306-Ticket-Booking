@@ -572,14 +572,20 @@ class Cancelorder(Login, Order):
         if html_orderinfo['status'] == True:
 #            println('查询未完成订单成功!')
             try:
-                if 'orderCacheDTO' in html_orderinfo['data']:
-                    orderCacheDTO = html_orderinfo['data']['orderCacheDTO'][0]
-                    if 'waitTime' in orderCacheDTO:
-                        time.sleep(int(orderCacheDTO['waitTime']) * 2)
-                        html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
-                    else:
-                        time.sleep(5)
-                if html_orderinfo and 'orderDBList' in html_orderinfo['data']:  
+                n = 0
+                while True and n < 36:
+                    if 'orderCacheDTO' in html_orderinfo['data']:
+                        n += 1
+                        orderCacheDTO = html_orderinfo['data']['orderCacheDTO']
+                        if 'waitTime' in orderCacheDTO:
+                            time.sleep(int(orderCacheDTO['waitTime']) * 2)
+                            html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
+                            println('第[' + str(n) + ']次查询订单状态...')
+                        else:
+                            time.sleep(5)
+                    if 'orderDBList' in html_orderinfo['data']:
+                        break
+                if 'orderDBList' in html_orderinfo['data']:  
                     order_info = html_orderinfo['data']['orderDBList'][0]
                     pass_list = order_info['array_passser_name_page']
                     sequence_no = order_info['tickets'][0]['sequence_no']
@@ -587,18 +593,19 @@ class Cancelorder(Login, Order):
                     from_station = order_info['from_station_name_page'][0]
                     to_station = order_info['to_station_name_page'][0]
                     print('订单详情:')
-                    println(train_date, from_station, to_station, pass_list, sequence_no)
+                    oInfo = train_date, from_station, to_station, pass_list, sequence_no
+                    println(oInfo)
                     res.update({'status' : True})
                     res.update({'sequence_no' : sequence_no})
-                    res.update({'startTimeString' : order_info['startTimeString']})
+                    res.update({'start_train_date_page' : order_info['start_train_date_page']})
                     res.update({'msg' : '获取未完成订单成功！'})
                 else:
                     res.update({'status' : False})
                     res.update({'msg' : '您没有未完成的订单！'})              
 #                return sequence_no
-            except:
+            except Exception as e:
                 res.update({'status' : False})
-                res.update({'msg' : '您没有未完成的订单！'})
+                res.update({'msg' : '查询未完成订单异常！' + str(e)})
 #                exit()
         else:
             res.update({'msg' : '查询未完成订单失败！'})
@@ -853,7 +860,6 @@ def order(bkInfo):
                         
                         cancelorder = Cancelorder()
                         res = cancelorder.orderinfo()
-                        
                 for train_idx in trains_idx:
                     t_no = result[int(train_idx) - 1].split('|')[3]
                     train_tip = date + '-' + from_station + '-' + to_station + '-' + t_no
@@ -897,13 +903,12 @@ def order(bkInfo):
                         p_idx = 1
                         for p in passengers:
                             if id_no == p['passenger_id_no']:
-                                if p_idx != 1:
-                                    passengers_name = passengers_name + ','
-                                passengers_name = passengers_name + str(p_idx)
+                                passengers_name = passengers_name + str(p_idx) + ','
                                 p_name = p_name + p['passenger_name']+'(' + p['passenger_id_no'][0:-4] + 'XXXX)'
                                 break
                             else:
-                               p_idx += 1 
+                               p_idx += 1
+                    passengers_name = passengers_name[:-1]
 #                    passengers_name = input('请选择您要购买的乘客编号(例:1,4):')
 #                    choose_seat = input('请选择您要购买的座位类型(例:商务座):')
 #                    print(passengers_name)
@@ -956,12 +961,14 @@ def order(bkInfo):
                     lock.acquire()
                     booking_now[bkInfo.group] = 0
                     lock.release()
-            except Exception as e:  
+            except Exception as e:
+                raise
                 print('['+ datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +']: 本次下单异常...')
+                println('小黑屋新增成员：['+ train_tip + ']')
+                ticket_black_list.update({train_tip : ticket_black_list_time })
                 print(e)
-                if str(e).find('Expecting value') > -1:
-                    println('小黑屋新增成员：['+ train_tip + ']')
-                    ticket_black_list.update({train_tip : ticket_black_list_time })
+#                if str(e).find('Expecting value') > -1:
+                    
 #                raise
         
 def run(bkInfo):
