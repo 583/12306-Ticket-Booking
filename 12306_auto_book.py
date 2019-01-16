@@ -89,7 +89,7 @@ class Leftquery(object):
 #        print(url)
         try:
 #            proxie = "{'http': 'http://127.0.0.1:8580'}"
-            q_res = requests.get(url, headers=self.headers, timeout=3, verify=False)
+            q_res = requests.get(url, headers=self.headers, timeout=2, verify=False)
 #            print(q_res)
             html = q_res.json()
 #            print(html)
@@ -158,7 +158,7 @@ class Leftquery(object):
                     time_out_cdn.update({host : int(time_out_cdn[host]) + 1})
                 else:
                     time_out_cdn.update({host : 1})
-            println('查询余票信息异常...')
+            println('查询余票信息异常: ' + str(e))
 #            print(e)
 #            exit()
 
@@ -755,7 +755,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(0.1 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
+        st = round(random.uniform(0.1 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 3.0), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
