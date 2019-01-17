@@ -89,7 +89,7 @@ class Leftquery(object):
 #        print(url)
         try:
 #            proxie = "{'http': 'http://127.0.0.1:8580'}"
-            q_res = requests.get(url, headers=self.headers, timeout=2, verify=False)
+            q_res = requests.get(url, headers=self.headers, timeout=3, verify=False)
 #            print(q_res)
             html = q_res.json()
 #            print(html)
