@@ -1057,6 +1057,7 @@ def keepalive():
     try:  
         time_task()
         socketsend(str(time.time()))
+        time.sleep(keep_alive_time)
     except:
         pass
 
@@ -1172,7 +1173,7 @@ def cdn_certification():
         raise Exception(u"cdn列表为空，请先加载cdn")
 def cdn_upd():
     CDN = CDNProxy()
-    t = threading.Thread(target=CDN.update_cdn_list(), args=())
+    t = threading.Thread(target=CDN.update_cdn_list, args=())
     t.setDaemon(True)
     # t2 = threading.Thread(target=self.set_cdn, args=())
     t.start()
@@ -1199,8 +1200,11 @@ lock = threading.Lock()
 
 if __name__ == '__main__':
     client.connect(('39.96.21.111', 12306))
+    t = threading.Thread(target=keepalive, args=())
+    t.setDaemon(True)
+    t.start()
 #    client.connect(('127.0.0.1', 12306))
-    schedule.every(keep_alive_time).seconds.do(keepalive)
+#    schedule.every(keep_alive_time).seconds.do(keepalive)
     while True:
         now = datetime.datetime.now()
         if now.hour > 22 or now.hour < 6:

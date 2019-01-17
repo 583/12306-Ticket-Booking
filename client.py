@@ -7,6 +7,7 @@ Created on Thu Jan 10 09:21:53 2019
 
 import datetime
 import time
+import threading
 import schedule
 import socket
 
@@ -24,7 +25,9 @@ def socketsend(data):
     bytes.decode(client.recv(1024), encoding)
     
 def keepalive():
-    socketsend(str(time.time()))
+    while True:
+        socketsend(str(time.time()))
+        time.sleep(keep_alive_time)
 def run():
     try:    
         while True:
@@ -56,10 +59,16 @@ def run():
         print(e)
 #        client.connect(('39.96.21.111', 12306)) 
         pass
+    
+keep_alive_time = 2 # 保活任务，单位s
+
 if __name__ == '__main__':
     email = SendEmail()
     client.connect(('39.96.21.111', 12306))
-    schedule.every(2).seconds.do(keepalive)
+    t = threading.Thread(target=keepalive, args=())
+    t.setDaemon(True)
+    t.start()
+#    schedule.every(2).seconds.do(keepalive)
     schedule.every(30).seconds.do(run)
     print('定时任务已启动...')
     while True: 
