@@ -755,7 +755,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(0.1 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 3.0), 2)
+        st = round(random.uniform(0.1 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
@@ -790,7 +790,7 @@ def order(bkInfo):
                         if seat[k] == cddt_seat:
                             cddt_seat_keys.append(k)
                             break
-                trains_idx = []
+                trains_idx = []   
                 temp_trains_idx = []
                 num = 1
                 for i in result:
