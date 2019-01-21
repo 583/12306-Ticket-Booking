@@ -605,7 +605,8 @@ class Cancelorder(Login, Order):
 #                return sequence_no
             except Exception as e:
                 res.update({'status' : False})
-                res.update({'msg' : '查询未完成订单异常！' + str(e)})
+                res.update({'msg' : '查询未完成订单异常！'})
+                println(e)
 #                exit()
         else:
             res.update({'msg' : '查询未完成订单失败！'})
@@ -912,8 +913,16 @@ def order(bkInfo):
 #                    passengers_name = input('请选择您要购买的乘客编号(例:1,4):')
 #                    choose_seat = input('请选择您要购买的座位类型(例:商务座):')
 #                    print(passengers_name)
-                    
+                    seat_dic = {21: '高级软卧', 23: '软卧', 26: '无座', 28: '硬卧', 29: '硬座', 30: '二等座', 31: '一等座', 32: '商务座',
+                                33: '动卧'}
+                    cddt_seats = []
                     for seat in bkInfo.candidate_seats:
+                        for idx in seat_dic:
+                            t_num = result[int(train_idx) - 1].split('|')[idx]
+                            if seat_dic[idx] == seat and t_num != '无' and t_num != '':
+                                cddt_seats.append(seat)
+                                break
+                    for seat in cddt_seats:
                         choose_seat = seat
 #                        print(choose_seat)
                         pass_info = order.chooseseat(passengers, passengers_name, choose_seat, content[8])
