@@ -48,8 +48,6 @@ ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
 
 encoding = 'utf-8'
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
 def conversion_int(str):
     return int(str)
@@ -1079,23 +1077,20 @@ def println(msg):
 #    thread = threading.Thread(target=socketsend,name='Thread-Socket-Send',args=(cmdTxt,))
 #    thread.start()
 def socketsend(data):
-    try:    
+    try:
+        global client
         client.sendall(data.encode(encoding))
         bytes.decode(client.recv(1024), encoding)
     except Exception as e:
         logger.error(e)
 #        print(e)
         try:
-            client.close()
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+            client.connect(('39.96.21.111', 12306))
         except:
-            try:
-                global client
-                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-                client.connect(('39.96.21.111', 12306))
-            except:
-                logger.error('尝试重连失败！')
-                print('尝试重连失败！')
+            logger.error('尝试重连失败！')
+            print('尝试重连失败！')
 def keepalive():
     try:  
         time_task()
@@ -1234,6 +1229,7 @@ global cddt_trains
 global thread_list
 global try_count
 global booking_now
+global client
 cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
@@ -1251,7 +1247,8 @@ if __name__ == '__main__':
         else:
             break
     print('*' * 30 + '12306自动抢票开始' + '*' * 30)
-    
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     client.connect(('39.96.21.111', 12306))
     t = threading.Thread(target=keepalive, args=())
     t.setDaemon(True)
