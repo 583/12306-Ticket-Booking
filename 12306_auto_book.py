@@ -29,6 +29,20 @@ from utils.cdnUtils import CDNProxy
 from utils.httpUtils import HTTPClient
 from utils.sendEmail import SendEmail
 
+import logging
+
+logger = logging.getLogger('PABS')
+logger.setLevel(logging.DEBUG)
+# 建立一个filehandler来把日志记录在文件里，级别为debug以上
+fh = logging.FileHandler('log/logging.log')
+fh.setLevel(logging.DEBUG)
+# 设置日志格式
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+fh.setFormatter(formatter)
+# 将相应的handler添加在logger对象中
+logger.addHandler(fh)
+
 urllib3.disable_warnings() #不显示警告信息
 ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
@@ -858,15 +872,23 @@ def order(bkInfo):
                         login.captcha(answer_num)
                         login.login()
                         auth_res = order.auth()
-                        
-                        cancelorder = Cancelorder()
-                        res = cancelorder.orderinfo()
+                        # 发送邮件提醒
+                        try:
+                            subject = '自助订票系统--自动登录通知'
+                            success_info = '<div>正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，请留意您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
+                            success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
+                            email = SendEmail()
+                            send_res = email.send(bkInfo.email, subject, success_info) 
+                        except:
+                            pass
+
+#                        cancelorder = Cancelorder()
+#                        res = cancelorder.orderinfo()
                 for train_idx in trains_idx:
                     t_no = result[int(train_idx) - 1].split('|')[3]
                     train_tip = date + '-' + from_station + '-' + to_station + '-' + t_no
                     # 如果在黑名单中，不抢票
                     if train_tip in ticket_black_list:
-                        continue
                         #println('['+ train_tip +']属于小黑屋成员，本次放弃下单，小黑屋剩余停留时间：' + str(ticket_black_list[train_tip]) + 's')
                         continue
                     println('正在抢 ' + date + '：[' + t_no + ']次 ' + from_station + '--->' + to_station)
@@ -1051,6 +1073,7 @@ def playaudio(path):
 def println(msg):
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ': ' + str(msg))
     cmdTxt = 'log:' + str(msg)
+    logger.info(msg)
     socketsend(cmdTxt)
 #    client.send(cmdTxt.encode(encoding))
 #    thread = threading.Thread(target=socketsend,name='Thread-Socket-Send',args=(cmdTxt,))
@@ -1060,8 +1083,16 @@ def socketsend(data):
         client.sendall(data.encode(encoding))
         bytes.decode(client.recv(1024), encoding)
     except Exception as e:
-        print(e)
-#        client.connect(('39.96.21.111', 12306))
+        logger.error(e)
+#        print(e)
+        try:
+            client.close()
+        except:
+            try:
+                client.connect(('39.96.21.111', 12306))
+            except:
+                logger.error('尝试重连失败！')
+                print('尝试重连失败！')
 def keepalive():
     try:  
         time_task()
@@ -1157,10 +1188,11 @@ def cdn_req(cdn):
                 cdn_list.append(cdn[i].replace("\n", ""))
     for to_cdn in time_out_cdn:
         # 移除超时次数大于5的cdn
-        if time_out_cdn[to_cdn] > 5 and to_cdn in cdn_list:
+        if time_out_cdn[to_cdn] > 3 and to_cdn in cdn_list:
             cdn_list.remove(to_cdn)
             time_out_cdn[to_cdn] = 0
-    print(u"所有cdn解析完成, 目前可用[" + str(len(cdn_list)) + "]个")
+    println(time_out_cdn)
+    println(u"所有cdn解析完成, 目前可用[" + str(len(cdn_list)) + "]个")
 
 def cdn_certification():
     """
@@ -1171,8 +1203,8 @@ def cdn_certification():
     all_cdn = CDN.open_cdn_file()
     if all_cdn:
         # print(u"由于12306网站策略调整，cdn功能暂时关闭。")
-        print(u"开启cdn查询")
-        print(u"本次待筛选cdn总数为{}, 筛选时间大约为5-10min".format(len(all_cdn)))
+        println(u"开启cdn查询")
+        println(u"本次待筛选cdn总数为{}".format(len(all_cdn)))
         t = threading.Thread(target=cdn_req, args=(all_cdn,))
         t.setDaemon(True)
         # t2 = threading.Thread(target=self.set_cdn, args=())
@@ -1208,12 +1240,6 @@ last_req_time = None
 lock = threading.Lock()
 
 if __name__ == '__main__':
-    client.connect(('39.96.21.111', 12306))
-    t = threading.Thread(target=keepalive, args=())
-    t.setDaemon(True)
-    t.start()
-#    client.connect(('127.0.0.1', 12306))
-#    schedule.every(keep_alive_time).seconds.do(keepalive)
     while True:
         now = datetime.datetime.now()
         if now.hour > 22 or now.hour < 6:
@@ -1222,6 +1248,14 @@ if __name__ == '__main__':
         else:
             break
     print('*' * 30 + '12306自动抢票开始' + '*' * 30)
+    
+    client.connect(('39.96.21.111', 12306))
+    t = threading.Thread(target=keepalive, args=())
+    t.setDaemon(True)
+    t.start()
+#    client.connect(('127.0.0.1', 12306))
+#    schedule.every(keep_alive_time).seconds.do(keepalive)
+
 #    init
     booking_list = {}
     cddt_trains = {}
