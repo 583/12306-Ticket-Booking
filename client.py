@@ -15,7 +15,7 @@ from utils.sendEmail import SendEmail
 
 encoding = 'utf-8'
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+#client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
 def println(msg):
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ': ' + msg)
@@ -37,6 +37,7 @@ def run():
                 time.sleep((60 - now.minute) * 60 - now.second + 5)
             else:
                 break
+        client.connect(('39.96.21.111', 12306))
         println('get mailtask...')
         client.send('getmailtask'.encode(encoding))
         resp = bytes.decode(client.recv(1024), encoding)
@@ -55,6 +56,7 @@ def run():
             else:
                 print('未发现邮件代发任务...')
 #        time.sleep(10)
+        client.close()
     except Exception as e:
         print(e)
 #        client.connect(('39.96.21.111', 12306)) 
@@ -64,14 +66,12 @@ keep_alive_time = 2 # 保活任务，单位s
 
 if __name__ == '__main__':
     email = SendEmail()
-    client.connect(('39.96.21.111', 12306))
-    t = threading.Thread(target=keepalive, args=())
-    t.setDaemon(True)
-    t.start()
+#    t = threading.Thread(target=keepalive, args=())
+#    t.setDaemon(True)
+#    t.start()
 #    schedule.every(2).seconds.do(keepalive)
     schedule.every(30).seconds.do(run)
     print('定时任务已启动...')
     while True: 
         schedule.run_pending()
         time.sleep(1)
-    client.close()
