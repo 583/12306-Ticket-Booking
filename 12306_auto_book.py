@@ -1089,6 +1089,9 @@ def socketsend(data):
             client.close()
         except:
             try:
+                global client
+                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
                 client.connect(('39.96.21.111', 12306))
             except:
                 logger.error('尝试重连失败！')
