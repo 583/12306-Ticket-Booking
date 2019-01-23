@@ -69,7 +69,7 @@ if __name__ == '__main__':
 #    t.setDaemon(True)
 #    t.start()
 #    schedule.every(2).seconds.do(keepalive)
-    schedule.every(10).seconds.do(run)
+    schedule.every(30).seconds.do(run)
     print('定时任务已启动...')
     while True:
         schedule.run_pending()
