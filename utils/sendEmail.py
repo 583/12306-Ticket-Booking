@@ -15,17 +15,19 @@ class SendEmail(object):
         self.mail_user = 'itsmartkit'
         self.mail_pass = ''
         self.sender = 'itsmartkit@163.com'
-    def send(self, receiver, subject, content):
+    def send(self, receivers, subject, content):
+        recv_list = receivers.split(',')
+        recv_list.append(self.sender)
         send_succ = False
         try:
             message = MIMEText(content, 'html', 'utf-8')
             message['Subject'] = Header(subject, 'utf-8')
             message['From'] = self.sender
-            message['To'] =  receiver
+            message['To'] =  receivers
             smtpObj = smtplib.SMTP() 
             smtpObj.connect(self.mail_host, 25)    # 25 为 SMTP 端口号
             smtpObj.login(self.mail_user, self.mail_pass)  
-            smtpObj.sendmail(self.sender, receiver, message.as_string())
+            smtpObj.sendmail(self.sender, recv_list, message.as_string())
             println('邮件发送成功！')
             smtpObj.quit()
             send_succ = True
