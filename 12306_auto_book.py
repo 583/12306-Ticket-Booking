@@ -414,7 +414,7 @@ class Order(object):
         seat_dict = {'无座': '1', '硬座': '1', '硬卧': '3', '软卧': '4', '高级软卧': '6', '动卧': 'F', '二等座': 'O', '一等座': 'M',
                      '商务座': '9'}
         choose_type = seat_dict[choose_seat]
-        if choose_seat=='无座' and stationTrainCode.find('D') == 0:
+        if choose_seat == '无座' and stationTrainCode.find('D') == 0:
             choose_type = 'O'
         pass_num = len(passengers_name.split(','))  # 购买的乘客数
         pass_list = passengers_name.split(',')
