@@ -1275,7 +1275,7 @@ if __name__ == '__main__':
 
     task()
     schedule.every(10).minutes.do(task)
-    schedule.every(12).minutes.do(cdn_upd)
+    schedule.every(30).minutes.do(cdn_upd)
     while True: 
         schedule.run_pending()
         time.sleep(1)
