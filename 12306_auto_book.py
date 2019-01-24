@@ -409,11 +409,13 @@ class Order(object):
 #        print('\n')
         return passengers
 
-    def chooseseat(self, passengers, passengers_name, choose_seat, token):
+    def chooseseat(self, passengers, passengers_name, stationTrainCode, choose_seat, token):
         '''选择乘客和座位'''
         seat_dict = {'无座': '1', '硬座': '1', '硬卧': '3', '软卧': '4', '高级软卧': '6', '动卧': 'F', '二等座': 'O', '一等座': 'M',
                      '商务座': '9'}
         choose_type = seat_dict[choose_seat]
+        if choose_seat=='无座' and stationTrainCode.find('D') == 0:
+            choose_type = 'O'
         pass_num = len(passengers_name.split(','))  # 购买的乘客数
         pass_list = passengers_name.split(',')
         pass_dict = []
@@ -623,8 +625,12 @@ class Cancelorder(Login, Order):
                     res.update({'start_train_date_page' : order_info['start_train_date_page']})
                     res.update({'msg' : '获取未完成订单成功！'})
                 else:
-                    res.update({'status' : False})
-                    res.update({'msg' : '您没有未完成的订单！'})              
+                    if 'orderCacheDTO' in html_orderinfo['data']:
+                        res.update({'status' : True})
+                        res.update({'msg' : '下单成功，系统正在为您分配坐席...'})
+                    else:             
+                        res.update({'status' : False})
+                        res.update({'msg' : '您没有未完成的订单！'})              
 #                return sequence_no
             except Exception as e:
                 res.update({'status' : False})
@@ -779,7 +785,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(0.1 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
+        st = round(random.uniform(0.5 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
@@ -960,7 +966,7 @@ def order(bkInfo):
                     for seat in cddt_seats:
                         choose_seat = seat
 #                        print(choose_seat)
-                        pass_info = order.chooseseat(passengers, passengers_name, choose_seat, content[8])
+                        pass_info = order.chooseseat(passengers, passengers_name, content[2], choose_seat, content[8])
                         # 查看余票数
 #                        print('查看余票')
                         order.leftticket(content[0], content[1], content[2], pass_info[2], content[3], content[4], content[5], content[6],
