@@ -60,12 +60,12 @@ class Reader(threading.Thread):
 #        return string
 
 def getmailtask():
-    task='taskinfo:'
+    task = 'taskinfo:'
     try:
 #        file_dir = '/usr/local/nginx/html/mailtask/'
         for root, dirs, files in os.walk(mt_path):
             for file in files:
-                task = file
+                task =  task + file
                 fp = codecs.open(mt_path + file,'r', encoding='UTF-8')
                 line = fp.readline()
                 fp.close()

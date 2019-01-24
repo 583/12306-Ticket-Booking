@@ -49,9 +49,12 @@ def run():
                 email = SendEmail()
                 send_res = email.send(mailInfo[1], mailInfo[2], mailInfo[3])
                 if send_res:
+                    print('邮件代发成功！')
                     cmdTxt = 'delmailtask:' + mailInfo[0]
                     client.sendall(cmdTxt.encode(encoding))
                     println('server response: ' + bytes.decode(client.recv(1024), encoding))
+                else:
+                    print('邮件代发失败！')
             else:
                 print('未发现邮件代发任务...')
 #        time.sleep(10)
