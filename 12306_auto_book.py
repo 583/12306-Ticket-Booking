@@ -1100,9 +1100,10 @@ def socketsend(data):
             print('尝试重连失败！')
 def keepalive():
     try:  
-        time_task()
-        socketsend(str(time.time()))
-        time.sleep(keep_alive_time)
+        while True:
+            time_task()
+            socketsend(str(time.time()))
+            time.sleep(keep_alive_time)
     except:
         pass
 
