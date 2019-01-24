@@ -16,8 +16,8 @@ class SendEmail(object):
         self.mail_pass = ''
         self.sender = 'itsmartkit@163.com'
     def send(self, receivers, subject, content):
+        receivers = receivers + ',' + self.sender
         recv_list = receivers.split(',')
-        recv_list.append(self.sender)
         send_succ = False
         try:
             message = MIMEText(content, 'html', 'utf-8')
