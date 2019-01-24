@@ -52,6 +52,15 @@ encoding = 'utf-8'
 def conversion_int(str):
     return int(str)
 
+def println(msg):
+    print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ': ' + str(msg))
+    cmdTxt = 'log:' + str(msg)
+    logger.info(msg)
+    socketsend(cmdTxt)
+def log(msg):
+    logger.info(msg)
+    print(msg)
+
 class Leftquery(object):
     '''余票查询'''
 #    global station_name_res
@@ -95,7 +104,7 @@ class Leftquery(object):
         host = 'kyfw.12306.cn'
         if cdn_list:
             host = cdn_list[random.randint(0, len(cdn_list) - 1)]
-        print('[' + threading.current_thread().getName() + ']: 余票查询开始，请求主机 --> [' + host + ']')
+        log('[' + threading.current_thread().getName() + ']: 余票查询开始，请求主机 --> [' + host + ']')
         url = 'https://'+ host +'/otn/leftTicket/queryZ?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
 #        print(url)
@@ -111,7 +120,7 @@ class Leftquery(object):
 #                exit()
             else:
                 msg = '[' + threading.current_thread().getName() + '] ' + date + ' ' + from_station + '-' + to_station + ' 第[' + str(self.n) + ']次查询成功!'
-                print('\n' + '*' * 6 + msg + '*' * 6 + '\n')
+                log('\n' + '*' * 6 + msg + '*' * 6 + '\n')
                 cmdTxt = 'log:' + msg
                 try:
                     client.sendall(cmdTxt.encode(encoding))
@@ -311,7 +320,7 @@ class Order(object):
         '''提交订单'''
         # 用户选择要购买的车次的序号
         secretStr = parse.unquote(result[int(train_number) - 1].split('|')[0])
-        print(secretStr)
+        log(secretStr)
         back_train_date = time.strftime("%Y-%m-%d", time.localtime())
         form = {
             'secretStr': secretStr,  # 'secretStr':就是余票查询中你选的那班车次的result的那一大串余票信息的|前面的字符串再url解码
@@ -325,7 +334,7 @@ class Order(object):
         }
         global req
         html_order = req.post(self.url_order, data=form, headers=self.head_1, verify=False).json()
-        print(html_order)
+        log(html_order)
         if html_order['status'] == True:
             println('尝试提交订单...')
         else:
@@ -443,7 +452,7 @@ class Order(object):
             num += 1
 
         passengerTicketStr = ''.join(TicketStr_list)
-        print(passengerTicketStr)
+        log(passengerTicketStr)
 
         num = 0
         passengrStr_list = []
@@ -515,7 +524,7 @@ class Order(object):
 #            count = html_count['data']['ticket']
 #            println('此座位类型还有余票' + count + '张~')
         else:
-            println('查看余票数量失败!')
+            println('检查余票数量失败!')
 #            exit()
 
 
@@ -604,7 +613,7 @@ class Cancelorder(Login, Order):
                     train_date = order_info['start_train_date_page']
                     from_station = order_info['from_station_name_page'][0]
                     to_station = order_info['to_station_name_page'][0]
-                    print('订单详情:')
+                    log('订单详情:')
                     oInfo = train_date, from_station, to_station, pass_list, sequence_no
                     println(oInfo)
                     res.update({'status' : True})
@@ -673,7 +682,7 @@ def pass_captcha():
     try:
         return pass_captcha_360(base64_str)
     except Exception as e:
-        print(e)
+        log(e)
         try:
             res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
             result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
@@ -709,7 +718,7 @@ def pass_captcha_360(img_buf):
         'check':json_check['check']
     }
     json_pass_res = req.post(url_img_vcode, data=json.dumps(form2), headers=headers2, verify=False).json()
-    print(json_pass_res)
+    log(json_pass_res)
     an = {'1': (31, 35), '2': (116, 46), '3': (191, 24), '4': (243, 50), '5': (22, 114), '6': (117, 94),
               '7': (167, 120), '8': (251, 105)}
     pass_res = json_pass_res['res'].split('),(')
@@ -761,7 +770,7 @@ def order(bkInfo):
         if thread_list[info_key] == False:
             cddt_trains.pop(info_key)
             booking_list.pop(info_key)
-            print('[' + threading.current_thread().getName() + ']: 抢票任务发生变动，当前线程退出...')
+            println('[' + threading.current_thread().getName() + ']: 抢票任务发生变动，当前线程退出...')
             break
         if booking_list[info_key] == True:
             try_count[info_key] += n
@@ -820,10 +829,10 @@ def order(bkInfo):
                             if seat_flag:
                                 t_tip  = date + '-' + from_station + '-' + to_station + '-' + info[3]
                                 if t_tip in ticket_black_list:
-                                    log = '['+ t_tip +']属于小黑屋成员，小黑屋剩余停留时间：' + str(ticket_black_list[t_tip]) + 's'
-                                    if pTxt != log:
-                                        pTxt = log
-                                        println(log)
+                                    temp = '['+ t_tip +']属于小黑屋成员，小黑屋剩余停留时间：' + str(ticket_black_list[t_tip]) + 's'
+                                    if pTxt != temp:
+                                        pTxt = temp
+                                        println(temp)
                                     
                                 else:
                                     if info[3] == train:
@@ -995,11 +1004,11 @@ def order(bkInfo):
                     booking_now[bkInfo.group] = 0
                     lock.release()
             except Exception as e:
-                raise
-                print('['+ datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +']: 本次下单异常...')
+                log('['+ datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +']: 本次下单异常...')
+                log(e)
                 println('小黑屋新增成员：['+ train_tip + ']')
                 ticket_black_list.update({train_tip : ticket_black_list_time })
-                print(e)
+                
 #                if str(e).find('Expecting value') > -1:
                     
 #                raise
@@ -1019,8 +1028,7 @@ def run(bkInfo):
             order(bkInfo)
             flag = True
         except BaseException as ex:
-            raise
-            print(ex)
+            log(ex)
             n += 1
             time.sleep(3)
             flag = False
@@ -1070,13 +1078,8 @@ def playaudio(path):
         time.sleep(12)
         pygame.mixer.music.stop()
     except Exception as e:
-        print(e)
+        log(e)
         
-def println(msg):
-    print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ': ' + str(msg))
-    cmdTxt = 'log:' + str(msg)
-    logger.info(msg)
-    socketsend(cmdTxt)
 #    client.send(cmdTxt.encode(encoding))
 #    thread = threading.Thread(target=socketsend,name='Thread-Socket-Send',args=(cmdTxt,))
 #    thread.start()
@@ -1250,12 +1253,11 @@ if __name__ == '__main__':
             time.sleep((60 - now.minute) * 60 - now.second + 5)
         else:
             break
-    print('*' * 30 + '12306自动抢票开始' + '*' * 30)
+    log('*' * 30 + '12306自动抢票开始' + '*' * 30)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     client.connect(('39.96.21.111', 12306))
     t = threading.Thread(target=keepalive, args=())
-    t.setDaemon(True)
     t.start()
 #    client.connect(('127.0.0.1', 12306))
 #    schedule.every(keep_alive_time).seconds.do(keepalive)
