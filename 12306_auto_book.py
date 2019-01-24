@@ -179,6 +179,8 @@ class Leftquery(object):
                     time_out_cdn.update({host : int(time_out_cdn[host]) + 1})
                 else:
                     time_out_cdn.update({host : 1})
+                if int(time_out_cdn[host]) > 2:
+                    cdn_list.remove(host)
             println('查询余票信息异常: ' + str(e))
 #            print(e)
 #            exit()
