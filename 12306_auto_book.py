@@ -889,7 +889,7 @@ def order(bkInfo):
                         auth_res = order.auth()
                         # 发送邮件提醒
                         subject = '自助订票系统--自动登录通知'
-                        success_info = '<div>正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，请留意您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
+                        success_info = '<div>正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后查看您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
                         success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                         email = SendEmail()
                         send_res = email.send(bkInfo.email, subject, success_info) 
@@ -918,7 +918,7 @@ def order(bkInfo):
                         if o_res['messages'][0].find('有未处理的订单') > -1 or o_res['messages'][0].find('未完成订单') > -1 :
                             println('您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。')
                             subject = '自助订票系统--任务取消通知'
-                            success_info = '<div>您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>当前抢票任务信息如下：</div>'
+                            success_info = '<div>您的账户[' + bkInfo.username + ']中有未完成订单，请在12306账号[未完成订单]中处理，本次任务结束。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>当前抢票任务信息如下：</div>'
                             success_info = success_info + '[' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车]</div>'
                             success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                             email = SendEmail()
