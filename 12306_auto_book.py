@@ -785,7 +785,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(0.5 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
+        st = round(random.uniform(0.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
