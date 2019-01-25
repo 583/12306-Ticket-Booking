@@ -57,9 +57,22 @@ def println(msg):
     cmdTxt = 'log:' + str(msg)
     logger.info(msg)
     socketsend(cmdTxt)
+    
 def log(msg):
     logger.info(msg)
     print(msg)
+
+def getip():
+    url = 'http://2019.ip138.com/ic.asp'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
+    }
+    html = req.get(url, headers=headers, verify=False).content
+    ip = re.findall(r'(?<![\.\d])(?:\d{1,3}\.){3}\d{1,3}(?![\.\d])', str(html))
+    if ip:
+        return ip[0]
+    else:
+        return ''
 
 class Leftquery(object):
     '''余票查询'''
@@ -866,6 +879,7 @@ def order(bkInfo):
                 if temp_trains_idx:
                     trains_idx.extend(temp_trains_idx)
                 if len(trains_idx) > 0:
+                    
                     lock.acquire()
 #                    if booking_now[bkInfo.group] > int(bkInfo.rank):
                     if booking_now[bkInfo.group] != 0:
@@ -889,7 +903,7 @@ def order(bkInfo):
                         auth_res = order.auth()
                         # 发送邮件提醒
                         subject = '自助订票系统--自动登录通知'
-                        success_info = '<div>正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后查看您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
+                        success_info = '<div>主机[' + local_ip + ']正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后查看您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
                         success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                         email = SendEmail()
                         send_res = email.send(bkInfo.email, subject, success_info) 
@@ -918,7 +932,7 @@ def order(bkInfo):
                         if o_res['messages'][0].find('有未处理的订单') > -1 or o_res['messages'][0].find('未完成订单') > -1 :
                             println('您的账户[' + bkInfo.username + ']中有未完成订单，本次任务结束。')
                             subject = '自助订票系统--任务取消通知'
-                            success_info = '<div>您的账户[' + bkInfo.username + ']中有未完成订单，请在12306账号[未完成订单]中处理，本次任务结束。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>当前抢票任务信息如下：</div>'
+                            success_info = '<div>主机[' + local_ip + ']通知：您的账户[' + bkInfo.username + ']中有未完成订单，请在12306账号[未完成订单]中处理，本次任务结束。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>当前抢票任务信息如下：</div>'
                             success_info = success_info + '[' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车]</div>'
                             success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                             email = SendEmail()
@@ -985,7 +999,7 @@ def order(bkInfo):
                         if res['status']:
                             booking_list[info_key] = res['status']
                             subject = '自助订票系统--订票成功通知'
-                            success_info = '<div>恭喜您，车票预订成功，请及时支付！</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>订单信息如下：</div>'
+                            success_info = '<div>主机[' + local_ip + ']通知：恭喜您，车票预订成功，请及时支付！</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>订单信息如下：</div>'
                             success_info = success_info + p_name + '，' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车，' + choose_seat +'。</div>'
                             success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                             email = SendEmail()
@@ -1122,6 +1136,8 @@ def task():
         else:
             break
     println('扫描抢票任务开始...')
+    global local_ip
+    local_ip = getip()
     filename='config/booking.txt'
     fp = codecs.open(filename,'r', encoding='UTF-8')
     booking = fp.readlines()
@@ -1203,7 +1219,7 @@ def cdn_req(cdn):
         if time_out_cdn[to_cdn] > 3 and to_cdn in cdn_list:
             cdn_list.remove(to_cdn)
             time_out_cdn[to_cdn] = 0
-    println(time_out_cdn)
+#    println(time_out_cdn)
     println(u"所有cdn解析完成, 目前可用[" + str(len(cdn_list)) + "]个")
 
 def cdn_certification():
@@ -1244,6 +1260,7 @@ global thread_list
 global try_count
 global booking_now
 global client
+global local_ip
 cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
@@ -1275,7 +1292,7 @@ if __name__ == '__main__':
     thread_list = {}
     try_count = {}
     booking_now = {}
-    
+    local_ip = getip()
 #    time.sleep(300)
     cdn_certification()
 
