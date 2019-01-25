@@ -1215,7 +1215,7 @@ def cdn_req(cdn):
             if cdn[i].replace("\n", "") not in cdn_list:
                 cdn_list.append(cdn[i].replace("\n", ""))
     for to_cdn in time_out_cdn:
-        # 移除超时次数大于5的cdn
+        # 移除超时次数大于n的cdn
         if time_out_cdn[to_cdn] > 3 and to_cdn in cdn_list:
             cdn_list.remove(to_cdn)
             time_out_cdn[to_cdn] = 0
