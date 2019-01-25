@@ -1108,10 +1108,8 @@ def socketsend(data):
             print('尝试重连失败！')
 def keepalive():
     try:  
-        while True:
-            time_task()
-            socketsend(str(time.time()))
-            time.sleep(keep_alive_time)
+        time_task()
+        socketsend(str(time.time()))
     except:
         pass
 
@@ -1266,8 +1264,8 @@ if __name__ == '__main__':
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     client.connect(('39.96.21.111', 12306))
-    t = threading.Thread(target=keepalive, args=())
-    t.start()
+#    t = threading.Thread(target=keepalive, args=())
+#    t.start()
 #    client.connect(('127.0.0.1', 12306))
 #    schedule.every(keep_alive_time).seconds.do(keepalive)
 
@@ -1284,6 +1282,7 @@ if __name__ == '__main__':
     task()
     schedule.every(10).minutes.do(task)
     schedule.every(30).minutes.do(cdn_upd)
+    schedule.every(keep_alive_time).seconds.do(keepalive)
     while True: 
         schedule.run_pending()
         time.sleep(1)
