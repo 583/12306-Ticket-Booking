@@ -903,7 +903,7 @@ def order(bkInfo):
                         auth_res = order.auth()
                         # 发送邮件提醒
                         subject = '自助订票系统--自动登录通知'
-                        success_info = '<div>主机[' + local_ip + ']正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后查看您12306账号中的未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
+                        success_info = '<div>主机[' + local_ip + ']正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后检查您12306账号中是否有未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
                         success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
                         email = SendEmail()
                         send_res = email.send(bkInfo.email, subject, success_info) 
