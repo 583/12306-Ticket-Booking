@@ -1286,7 +1286,6 @@ if __name__ == '__main__':
 #    client.connect(('127.0.0.1', 12306))
 #    schedule.every(keep_alive_time).seconds.do(keepalive)
 
-#    init
     booking_list = {}
     cddt_trains = {}
     thread_list = {}
