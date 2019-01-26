@@ -1264,7 +1264,7 @@ global local_ip
 cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
-ticket_black_list_time = 300 # 小黑屋时间，单位s
+ticket_black_list_time = 120 # 小黑屋时间，单位s
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
