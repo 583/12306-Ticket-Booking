@@ -204,8 +204,8 @@ class Login(object):
     '''登录模块'''
 
     def __init__(self):
-        self.username = username
-        self.password = password
+#        self.username = username
+#        self.password = password
         self.url_pic = 'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&0.15905700266966694'
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
@@ -258,11 +258,11 @@ class Login(object):
             println('验证码校验失败!')
             exit()
 
-    def login(self):
+    def login(self, username, password):
         '''登录账号'''
         form_login = {
-            'username': self.username,
-            'password': self.password,
+            'username': username,
+            'password': password,
             'appid': 'otn'
         }
         global req
@@ -899,7 +899,7 @@ def order(bkInfo):
                             continue
 #                       print(answer_num)
                         login.captcha(answer_num)
-                        login.login()
+                        login.login(bkInfo.username, bkInfo.password)
                         auth_res = order.auth()
                         # 发送邮件提醒
                         subject = '自助订票系统--自动登录通知'
@@ -1039,10 +1039,10 @@ def run(bkInfo):
 #    print('1.购票  2.取消订单  3.退票')
 #    print('*' * 69)
 #    func = input('请输入您要操作的选项(例:1):')
-    global username, password
-    username = bkInfo.username
-    password = bkInfo.password
-    println('当前购票账号：' + username)
+#    global username, password
+#    username = bkInfo.username
+#    password = bkInfo.password
+    println('当前购票账号：' + bkInfo.username)
     flag = False
     n = 0
     while flag == False and n < 5:
@@ -1248,12 +1248,14 @@ def cdn_upd():
     t.start()
             
 def time_task():
+    lock.acquire()
     for t in ticket_black_list:
 #        print(ticket_black_list[t])
         ticket_black_list[t] = ticket_black_list[t] - timespan
         if ticket_black_list[t] < 1:
             println('[{}]离开小黑屋'.format(t))
             ticket_black_list.pop(t)
+    lock.release()
 global booking_list
 global cddt_trains
 global thread_list
