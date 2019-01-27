@@ -1264,6 +1264,7 @@ global local_ip
 cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
+timespan = 1
 ticket_black_list_time = 120 # 小黑屋时间，单位s
 ticket_black_list = {}
 last_req_time = None
@@ -1298,7 +1299,7 @@ if __name__ == '__main__':
     task()
     schedule.every(10).minutes.do(task)
     schedule.every(30).minutes.do(cdn_upd)
-    schedule.every(keep_alive_time).seconds.do(keepalive)
+    schedule.every(timespan).seconds.do(time_task)
     while True: 
         schedule.run_pending()
         time.sleep(1)
