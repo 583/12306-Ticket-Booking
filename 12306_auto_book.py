@@ -1300,7 +1300,7 @@ if __name__ == '__main__':
 
     task()
     schedule.every(10).minutes.do(task)
-    schedule.every(30).minutes.do(cdn_upd)
+    schedule.every(120).minutes.do(cdn_upd)
     schedule.every(timespan).seconds.do(time_task)
     while True: 
         schedule.run_pending()
