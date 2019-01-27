@@ -1250,7 +1250,7 @@ def cdn_upd():
 def time_task():
     for t in ticket_black_list:
 #        print(ticket_black_list[t])
-        ticket_black_list[t] = ticket_black_list[t] - keep_alive_time
+        ticket_black_list[t] = ticket_black_list[t] - timespan
         if ticket_black_list[t] < 1:
             println('[{}]离开小黑屋'.format(t))
             ticket_black_list.pop(t)
