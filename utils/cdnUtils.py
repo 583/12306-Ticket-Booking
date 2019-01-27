@@ -26,7 +26,7 @@ class CDNProxy:
         self.httpClint = requests
         self.ping_encode = ['']
         self.city_list = []
-        self.timeout = 5
+        self.timeout = 3
 
     def _set_header(self):
         """设置header"""
@@ -152,4 +152,4 @@ if __name__ == '__main__':
 #    t.setDaemon(True)
 #    # t2 = threading.Thread(target=self.set_cdn, args=())
 #    t.start()
-    cdn.write_cdn_file()
+#    cdn.write_cdn_file()
