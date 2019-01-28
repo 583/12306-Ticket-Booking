@@ -899,6 +899,14 @@ def order(bkInfo):
                     order = Order()
                     auth_res = order.auth()
                     while auth_res['status'] != True or auth_res['realname'] != bkInfo.realname:
+                        if auth_res['status'] == True:
+                            # 先退出当前登录账号
+                            url_logout = 'https://kyfw.12306.cn/otn/login/loginOut'
+                            try:
+                                global req
+                                req.get(url_logout, verify=False).text
+                            except:
+                                pass
                         # 填写验证码
                         login = Login()
                         answer_num = pass_captcha()
