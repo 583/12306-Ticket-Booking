@@ -204,8 +204,8 @@ class Login(object):
     '''登录模块'''
 
     def __init__(self):
-        self.username = username
-        self.password = password
+#        self.username = username
+#        self.password = password
         self.url_pic = 'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&0.15905700266966694'
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
@@ -258,11 +258,11 @@ class Login(object):
             println('验证码校验失败!')
             exit()
 
-    def login(self):
+    def login(self, username, password):
         '''登录账号'''
         form_login = {
-            'username': self.username,
-            'password': self.password,
+            'username': username,
+            'password': password,
             'appid': 'otn'
         }
         global req
@@ -301,6 +301,8 @@ class Order(object):
     def auth(self):
         '''验证uamtk和uamauthclient'''
         # 验证uamtk
+        auth_res = {'status': True}
+        
         form = {
             'appid': 'otn',
             # '_json_att':''
@@ -310,9 +312,11 @@ class Order(object):
         println(html_uam)
         if html_uam['result_code'] == 0:
             println('恭喜您,uam验证成功!')
+            auth_res.update({'status': True})
         else:
             println('uam验证失败!')
-            return False
+            auth_res.update({'status': False})
+            return auth_res
 #            exit()
         # 验证uamauthclient
         tk = html_uam['newapptk']
@@ -325,10 +329,13 @@ class Order(object):
         println(html_uamclient)
         if html_uamclient['result_code'] == 0:
             println('恭喜您,uamclient验证成功!')
+            auth_res.update({'status': True})
+            auth_res.update({'realname': html_uamclient['username']})
         else:
             println('uamclient验证失败!')
-            return False
-        return True
+            auth_res.update({'status': False})
+            return auth_res
+        return auth_res
 #            exit()
 
     def order(self, result, train_number, from_station, to_station, date):
@@ -792,6 +799,7 @@ def order(bkInfo):
             cddt_trains.pop(info_key)
             booking_list.pop(info_key)
             println('[' + threading.current_thread().getName() + ']: 抢票任务发生变动，当前线程退出...')
+            res['status'] = True
             break
         if booking_list[info_key] == True:
             try_count[info_key] += n
@@ -889,7 +897,7 @@ def order(bkInfo):
                     lock.release()
                     order = Order()
                     auth_res = order.auth()
-                    while auth_res != True:
+                    while auth_res['status'] != True or auth_res['realname'] != bkInfo.realname:
                         # 填写验证码
                         login = Login()
                         answer_num = pass_captcha()
@@ -899,7 +907,7 @@ def order(bkInfo):
                             continue
 #                       print(answer_num)
                         login.captcha(answer_num)
-                        login.login()
+                        login.login(bkInfo.username, bkInfo.password)
                         auth_res = order.auth()
                         # 发送邮件提醒
                         subject = '自助订票系统--自动登录通知'
@@ -1057,13 +1065,16 @@ def run(bkInfo):
             println('第【'+ str(n) +'】次失败重试中...')
            
 class BookingInfo(object):
-    def __init__(self, bno, group ,rank, username, password, from_station, to_station, dates, passengers_name, passengers_id_no, candidate_trains, candidate_seats, email, set_out, arrival, cddt_train_types):
+    def __init__(self, bno, group ,rank, realname, username, password, from_station, to_station, dates, passengers_name, passengers_id_no, candidate_trains, candidate_seats, email, set_out, arrival, cddt_train_types):
         # 账号
         self.uuid = bno + '-' + dates
         
         self.group = group
         
+        self.realname = realname
+        
         self.username = username
+        
         # 密码
         self.password = password
         # 出发点
@@ -1148,7 +1159,7 @@ def task():
         if info_str.find('#') == 0:
             continue
         info = info_str.split('|')
-        bkInfo = BookingInfo(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13], info[14] ,info[15])
+        bkInfo = BookingInfo(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13], info[14], info[15], info[16])
 #        run(bkInfo)
         info_key = bkInfo.uuid + '-' + bkInfo.from_station + '-' + bkInfo.to_station
 #        print(bkInfo.uuid)
