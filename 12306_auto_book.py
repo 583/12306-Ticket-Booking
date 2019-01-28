@@ -917,20 +917,21 @@ def order(bkInfo):
                         login.captcha(answer_num)
                         login.login(bkInfo.username, bkInfo.password)
                         auth_res = order.auth()
-                        # 发送邮件提醒
-                        subject = '自助订票系统--自动登录通知'
-                        success_info = '<div>主机[' + local_ip + ']正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后检查您12306账号中是否有未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
-                        success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
-                        email = SendEmail()
-                        send_res = email.send(bkInfo.email, subject, success_info) 
-                        if send_res == False:
-                            println('正在尝试使用邮件代理发送...')
-                            cmdTxt = 'addmailtask:' + bkInfo.email + '|' + subject + '|' + success_info
-                            try:
-                                client.sendall(cmdTxt.encode(encoding))
-                                resp = bytes.decode(client.recv(1024), encoding)
-                            except:
-                                pass
+#                        if auth_res['status'] == True:
+#                            # 发送邮件提醒
+#                            subject = '自助订票系统--自动登录通知'
+#                            success_info = '<div>主机[' + local_ip + ']正在尝试登录12306账号[' + bkInfo.username + ']进行抢票前的准备工作，若未收到后续通知，请于20分钟后检查您12306账号中是否有未完成订单。</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>'
+#                            success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
+#                            email = SendEmail()
+#                            send_res = email.send(bkInfo.email, subject, success_info) 
+#                            if send_res == False:
+#                                println('正在尝试使用邮件代理发送...')
+#                                cmdTxt = 'addmailtask:' + bkInfo.email + '|' + subject + '|' + success_info
+#                                try:
+#                                    client.sendall(cmdTxt.encode(encoding))
+#                                    resp = bytes.decode(client.recv(1024), encoding)
+#                                except:
+#                                    pass
 #                        cancelorder = Cancelorder()
 #                        res = cancelorder.orderinfo()
                 for train_idx in trains_idx:
@@ -1287,7 +1288,7 @@ cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
 timespan = 1
-ticket_black_list_time = 120 # 小黑屋时间，单位s
+ticket_black_list_time = 180 # 小黑屋时间，单位s
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
