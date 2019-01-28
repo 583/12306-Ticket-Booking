@@ -1248,14 +1248,15 @@ def cdn_upd():
     t.start()
             
 def time_task():
-    lock.acquire()
+#    lock.acquire()
     for t in ticket_black_list:
 #        print(ticket_black_list[t])
         ticket_black_list[t] = ticket_black_list[t] - timespan
         if ticket_black_list[t] < 1:
             println('[{}]离开小黑屋'.format(t))
             ticket_black_list.pop(t)
-    lock.release()
+            break
+#    lock.release()
 global booking_list
 global cddt_trains
 global thread_list
