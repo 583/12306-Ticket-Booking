@@ -34,7 +34,7 @@ import logging
 logger = logging.getLogger('PABS')
 logger.setLevel(logging.DEBUG)
 # 建立一个filehandler来把日志记录在文件里，级别为debug以上
-fh = logging.FileHandler('log/logging.log')
+fh = logging.FileHandler('log/logging-core.log')
 fh.setLevel(logging.DEBUG)
 # 设置日志格式
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
