@@ -1039,9 +1039,9 @@ def order(bkInfo):
                             break
                         else:
                             println(res['msg'])
-#                            if res['msg'].find('余票不足') > -1 or res['msg'].find('排队人数现已超过余票数') > -1:
-#                                println('小黑屋新增成员：['+ train_tip + ']')
-#                                ticket_black_list.update({train_tip : ticket_black_list_time })
+                            if res['msg'].find('余票不足') > -1 or res['msg'].find('排队人数现已超过余票数') > -1:
+                                println('小黑屋新增成员：['+ train_tip + ']')
+                                ticket_black_list.update({train_tip : ticket_black_list_time })
                     if res['status']:
                         break
                     lock.acquire()
@@ -1050,10 +1050,8 @@ def order(bkInfo):
             except Exception as e:
                 log('['+ datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +']: 本次下单异常...')
                 log(e)
-#                println('小黑屋新增成员：['+ train_tip + ']')
-#                ticket_black_list.update({train_tip : ticket_black_list_time })
-                
-#                if str(e).find('Expecting value') > -1:
+                println('小黑屋新增成员：['+ train_tip + ']')
+                ticket_black_list.update({train_tip : ticket_black_list_time })
                     
 #                raise
         
@@ -1292,7 +1290,7 @@ cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
 timespan = 5
-ticket_black_list_time = -1 # 核心任务取消小黑屋功能
+ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
