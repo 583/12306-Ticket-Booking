@@ -1019,6 +1019,7 @@ def order(bkInfo):
                                 res.update({'msg' : '出票失败，余票不足！'})
                         if res['status']:
                             booking_list[info_key] = res['status']
+                            println('恭喜您，抢票成功！')
                             subject = '自助订票系统--订票成功通知'
                             success_info = '<div>主机[' + local_ip + ']通知：恭喜您，车票预订成功，请及时支付！</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>订单信息如下：</div>'
                             success_info = success_info + p_name + '，' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车，' + choose_seat +'。</div>'
