@@ -1289,7 +1289,7 @@ global local_ip
 cdn_list = []
 time_out_cdn = {}
 keep_alive_time = 2 # 保活任务，单位s
-timespan = 5
+timespan = 1
 ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
@@ -1328,5 +1328,3 @@ if __name__ == '__main__':
         schedule.run_pending()
         time.sleep(1)
     client.close()
-    
-    
