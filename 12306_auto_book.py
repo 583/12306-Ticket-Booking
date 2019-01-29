@@ -711,13 +711,13 @@ def pass_captcha():
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
     }
     try:
-        return pass_captcha_360(base64_str)
+        res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
+        result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
+        return result 
     except Exception as e:
-        log(e)
+#        log(e)
         try:
-            res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
-            result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
-            return result
+            return pass_captcha_360(base64_str)
         except:
             println('Sorry!验证码自动识别网址已失效~')
     #        exit()
@@ -739,7 +739,7 @@ def pass_captcha_360(img_buf):
         'base64': img_buf,
     }
     global req
-    json_check = req.post(url_get_check, data=json.dumps(form1), headers=headers1, verify=False).json()
+    json_check = req.post(url_get_check, data=json.dumps(form1), headers=headers1, timeout=5, verify=False).json()
 #    print(json_check)
     form2 = {
         '=': '',
