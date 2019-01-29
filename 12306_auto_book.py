@@ -624,8 +624,11 @@ class Cancelorder(Login, Order):
                         orderCacheDTO = html_orderinfo['data']['orderCacheDTO']
                         if 'waitTime' in orderCacheDTO:
                             time.sleep(int(orderCacheDTO['waitTime']) * 2)
-                            html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
-                            println('第[' + str(n) + ']次查询订单状态...')
+                            try:
+                                html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
+                                println('第[' + str(n) + ']次查询订单状态...')
+                            except:
+                                pass
                         else:
                             time.sleep(5)
                     if 'orderDBList' in html_orderinfo['data']:
