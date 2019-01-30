@@ -482,13 +482,13 @@ class Order(object):
         passengrStr_list = []
         for i in pass_dict:
             if pass_num == 1:
-                passengerStr = i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ',1_'
+                passengerStr = i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ',1'
                 passengrStr_list.append(passengerStr)
             elif num == 0:
                 passengerStr = i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ','
                 passengrStr_list.append(passengerStr)
             elif num == pass_num - 1:
-                passengerStr = '1_' + i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ',1_'
+                passengerStr = '1_' + i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ',1'
                 passengrStr_list.append(passengerStr)
             else:
                 passengerStr = '1_' + i['pass_name'] + ',' + i['pass_type'] + ',' + i['pass_id'] + ','
@@ -703,12 +703,12 @@ def pass_captcha():
 #    print(base64_str)
     open('pic.jpg', 'wb').write(html_pic)
     files = {
-        'file': open('pic.jpg', 'rb')
+        'pic_xxfile': open('pic.jpg', 'rb')
     }
     headers = {
         'Referer': url_captcha,
         'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36'
     }
     try:
         res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
