@@ -444,7 +444,8 @@ class Order(object):
             pass_name = info['passenger_name']  # 名字
             pass_id = info['passenger_id_no']  # 身份证号
             pass_phone = info['mobile_no']  # 手机号码
-            pass_type = info['passenger_type']  # 证件类型
+#            pass_type = info['passenger_type']  # 证件类型
+            pass_type = '1'  # 默认成人身份证
             dict = {
                 'choose_type': choose_type,
                 'pass_name': pass_name,
@@ -623,7 +624,17 @@ class Cancelorder(Login, Order):
                         n += 1
                         orderCacheDTO = html_orderinfo['data']['orderCacheDTO']
                         if 'waitTime' in orderCacheDTO:
-                            time.sleep(20)
+                            t = int(orderCacheDTO['waitTime'])
+                            if t > 0:
+                                time.sleep(t + 1)
+                            else:
+                                if orderCacheDTO['status'] != 1 and 'message' in orderCacheDTO:
+                                    res.update({'status' : False})
+                                    res.update({'msg' : orderCacheDTO['message']['message']})
+                                else:
+                                    res.update({'status' : False})
+                                    res.update({'msg' : '查询未完成订单异常！'})
+                                return res
                             try:
                                 html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
                                 println('第[' + str(n) + ']次查询订单状态...')
@@ -1017,7 +1028,29 @@ def order(bkInfo):
                             res = cancelorder.orderinfo()
                             if res['status'] != True:
                                 println(res['msg'])
-                                res.update({'msg' : '出票失败，余票不足！'})
+                                res.update({'msg' : res['msg']})
+                            if res['msg'].find('余票不足') < 0 and res['msg'].find('没有足够的票') < 0:
+                                println('下单异常，抢票当前任务退出...')
+                                # 发送邮件
+                                subject = '自助订票系统--任务取消通知'
+                                success_info = '<div  style="color: #000000; padding-top: 5px; padding-bottom: 5px;">主机[' + local_ip + ']通知：' + res['msg'] + '</div><div style="color: #000000; padding-top: 5px; padding-bottom: 5px; font-weight: bold;"><div>订票信息如下：</div>'
+                                success_info = success_info + '，' + date + '，' + from_station + '-->' + to_station + '，' + t_no + '次列车。</div>'
+                                success_info = success_info + '<div><p>---------------------<br/>From: 12306 PABS<br/>' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '</p><div>'
+                                email = SendEmail()
+                                send_res = email.send(bkInfo.email, subject, success_info)
+                                playaudio(r'audio/HeartsDesire.mp3')
+                                if send_res == False:
+                                    playaudio(r'audio/Lively.mp3')
+                                    println('正在尝试使用邮件代理发送...')
+                                    cmdTxt = 'addmailtask:' + bkInfo.email + '|' + subject + '|' + success_info
+                                    try:
+                                        client.sendall(cmdTxt.encode(encoding))
+                                        resp = bytes.decode(client.recv(1024), encoding)
+                                    except:
+                                        pass
+                                    
+                                res['status'] = True
+                                break
                         if res['status']:
                             booking_list[info_key] = res['status']
                             println('恭喜您，抢票成功！')
