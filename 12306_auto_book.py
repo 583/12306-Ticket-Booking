@@ -623,7 +623,7 @@ class Cancelorder(Login, Order):
                     if 'orderCacheDTO' in html_orderinfo['data']:
                         n += 1
                         orderCacheDTO = html_orderinfo['data']['orderCacheDTO']
-                        print(orderCacheDTO)
+#                        print(orderCacheDTO)
                         if 'waitTime' in orderCacheDTO:
                             t = int(orderCacheDTO['waitTime'])
                             if t >= 0:
@@ -638,7 +638,7 @@ class Cancelorder(Login, Order):
                                 return res
                             try:
                                 html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
-                                print(html_orderinfo)
+#                                print(html_orderinfo)
                                 println('第[' + str(n) + ']次查询订单状态...')
                             except:
                                 pass
