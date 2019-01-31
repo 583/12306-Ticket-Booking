@@ -980,11 +980,12 @@ def order(bkInfo):
                         for p in passengers:
                             if id_no == p['passenger_id_no']:
                                 passengers_name = passengers_name + str(p_idx) + ','
-                                p_name = p_name + p['passenger_name']+'(' + p['passenger_id_no'][0:-4] + 'XXXX)'
+                                p_name = p_name + p['passenger_name']+'(' + p['passenger_id_no'][0:-4] + 'XXXX)' + ', '
                                 break
                             else:
                                p_idx += 1
                     passengers_name = passengers_name[:-1]
+                    p_name = p_name[:-1]
 #                    passengers_name = input('请选择您要购买的乘客编号(例:1,4):')
 #                    choose_seat = input('请选择您要购买的座位类型(例:商务座):')
 #                    print(passengers_name)
