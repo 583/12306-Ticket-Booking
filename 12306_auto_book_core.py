@@ -623,7 +623,7 @@ class Cancelorder(Login, Order):
                         n += 1
                         orderCacheDTO = html_orderinfo['data']['orderCacheDTO']
                         if 'waitTime' in orderCacheDTO:
-                            time.sleep(int(orderCacheDTO['waitTime']) * 2)
+                            time.sleep(20)
                             try:
                                 html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
                                 println('第[' + str(n) + ']次查询订单状态...')
@@ -711,13 +711,13 @@ def pass_captcha():
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36'
     }
     try:
-        res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
-        result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
-        return result
+        return pass_captcha_360(base64_str)
     except Exception as e:
 #        log(e)
         try:
-            return pass_captcha_360(base64_str)
+            res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
+            result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
+            return result 
         except:
             println('Sorry!验证码自动识别网址已失效~')
     #        exit()
@@ -739,7 +739,7 @@ def pass_captcha_360(img_buf):
         'base64': img_buf,
     }
     global req
-    json_check = req.post(url_get_check, data=json.dumps(form1), headers=headers1, timeout=5, verify=False).json()
+    json_check = req.post(url_get_check, data=json.dumps(form1), headers=headers1, timeout=2, verify=False).json()
 #    print(json_check)
     form2 = {
         '=': '',
