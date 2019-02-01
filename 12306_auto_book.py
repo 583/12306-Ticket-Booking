@@ -814,7 +814,7 @@ def order(bkInfo):
                 time.sleep((60 - now.minute) * 60 - now.second + 5)
             else:
                 break
-        if string_toTimestamp(bkInfo.expired) < int(time.time()):
+        if len(bkInfo.expired) > 0 and string_toTimestamp(bkInfo.expired) < int(time.time()):
             println('[' + threading.current_thread().getName() + ']: 抢票任务已过期，当前线程退出...')
             res['status'] = True
             break
@@ -1278,7 +1278,7 @@ def task():
             flag = True
             thread_list.update({info_key : False})
             println('取消抢票任务-->' + info_key)
-        if string_toTimestamp(bkInfo.expired) < int(time.time()):
+        if len(bkInfo.expired) > 0 and string_toTimestamp(bkInfo.expired) < int(time.time()):
             flag = True
             thread_list.update({info_key : False})
             println('任务过期，取消任务-->' + info_key)
