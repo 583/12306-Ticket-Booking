@@ -1393,7 +1393,7 @@ ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
-task_src = 'inet'
+task_src = 'net'
 
 if __name__ == '__main__':
     while True:
