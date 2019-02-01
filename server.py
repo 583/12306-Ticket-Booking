@@ -17,6 +17,7 @@ encoding = 'utf-8'
 BUFSIZE = 1024
 mt_path = '/usr/local/nginx/html/mailtask/'
 log_path = '/usr/local/nginx/html/log/'
+ct_path = '/usr/local/nginx/html/canceltask/'
 # a read thread, read data from remote
 class Reader(threading.Thread):
     def __init__(self, client):
@@ -41,6 +42,15 @@ class Reader(threading.Thread):
                     delfile(mt_path + msg[12:])
                 if msg.startswith('getmailtask'):
                     self.client.sendall(getmailtask().encode(encoding))
+                else:
+                    self.client.sendall('success'.encode(encoding))
+                # 取消任务
+                if msg.startswith('delcanceltask'):
+                    if not os.path.exists(ct_path):
+                        os.makedirs(ct_path)
+                    delfile(ct_path + msg[14:])
+                if msg.startswith('getcanceltask'):
+                    self.client.sendall(getcanceltask().encode(encoding))
                 else:
                     self.client.sendall('success'.encode(encoding))
             else:
@@ -73,7 +83,27 @@ def getmailtask():
                 break
         print('获取邮件发送任务成功！')
     except Exception as e:
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '：获取邮件发送任务异常失败！')
+        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '：获取邮件发送任务异常！')
+        print(e)
+        pass
+    
+    return task
+
+def getcanceltask():
+    task = 'taskinfo:'
+    try:
+#        file_dir = '/usr/local/nginx/html/mailtask/'
+        for root, dirs, files in os.walk(ct_path):
+            for file in files:
+                task =  task + file
+                fp = codecs.open(mt_path + file,'r', encoding='UTF-8')
+                line = fp.readline()
+                fp.close()
+                task = task+ '|' + line
+                break
+        print('获取取消抢票任务成功！')
+    except Exception as e:
+        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '：获取取消抢票任务异常！')
         print(e)
         pass
     

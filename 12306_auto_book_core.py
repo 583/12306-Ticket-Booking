@@ -1208,6 +1208,11 @@ def task():
         bkInfo = BookingInfo(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13], info[14], info[15], info[16])
 #        run(bkInfo)
         info_key = bkInfo.uuid + '-' + bkInfo.from_station + '-' + bkInfo.to_station
+        str_dates = ''
+        for d in bkInfo.dates:
+            str_dates = d + ','
+        str_dates = str_dates[:-1]
+        cancel_key = bkInfo.username + '-' + str_dates + '-' + bkInfo.group
 #        print(bkInfo.uuid)
         flag = False
         for key in booking_list:
@@ -1215,6 +1220,26 @@ def task():
             if key == info_key:
                 flag = True
                 break
+        # 检查是否有退出任务
+        try:
+            println('get canceltask...')
+            client.send('getcanceltask'.encode(encoding))
+            resp = bytes.decode(client.recv(1024), encoding)
+            if resp.startswith('taskinfo'):
+                resp = resp[9:]
+                if len(resp) > 0:
+                    print('获取取消抢票任务信息成功！')
+                    jobs = resp.split('|')
+                    if cancel_key in jobs:
+                        flag = True
+                        thread_list.update({info_key : False})
+                        println('取消抢票任务-->' + info_key)
+                        cmdTxt = 'delcanceltask:' + jobs[0]
+                        client.sendall(cmdTxt.encode(encoding))
+                else:
+                    print('未发现取消抢票任务...')
+        except:
+            pass
         cddt_tra_flag = False
         for key in cddt_trains:
 #            print(key)
@@ -1229,7 +1254,7 @@ def task():
         else:
             cddt_trains.update({info_key : info[8]})
         if flag == False:
-            println(' 添加抢票任务-->' + info_key)
+            println('添加抢票任务-->' + info_key)
             booking_list.update({info_key : False})
             
             try_count.update({info_key : 0})
