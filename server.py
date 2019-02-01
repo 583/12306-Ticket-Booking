@@ -42,15 +42,21 @@ class Reader(threading.Thread):
                     delfile(mt_path + msg[12:])
                 if msg.startswith('getmailtask'):
                     self.client.sendall(getmailtask().encode(encoding))
-                else:
-                    self.client.sendall('success'.encode(encoding))
                 # 取消任务
                 if msg.startswith('delcanceltask'):
-                    if not os.path.exists(ct_path):
-                        os.makedirs(ct_path)
                     delfile(ct_path + msg[14:])
                 if msg.startswith('getcanceltask'):
+                    if not os.path.exists(ct_path):
+                        os.makedirs(ct_path)
                     self.client.sendall(getcanceltask().encode(encoding))
+                if msg.startswith('getfile'):
+                    if not os.path.exists(msg[8:]):
+                        info = '# file does not exist'
+                        self.client.sendall(('Content-Length:' + str(len(info))).encode(encoding))
+                        data = self.client.recv(BUFSIZE)
+                        self.client.sendall(info.encode(encoding))
+                    else:
+                        getfile(self.client, msg[8:])
                 else:
                     self.client.sendall('success'.encode(encoding))
             else:
@@ -96,7 +102,7 @@ def getcanceltask():
         for root, dirs, files in os.walk(ct_path):
             for file in files:
                 task =  task + file
-                fp = codecs.open(mt_path + file,'r', encoding='UTF-8')
+                fp = codecs.open(ct_path + file,'r', encoding='UTF-8')
                 line = fp.readline()
                 fp.close()
                 task = task+ '|' + line
@@ -106,8 +112,20 @@ def getcanceltask():
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '：获取取消抢票任务异常！')
         print(e)
         pass
-    
     return task
+
+def getfile(conn, fullpath):
+    try:
+        conn.sendall(('Content-Length:' + str(os.path.getsize(fullpath))).encode(encoding))
+        conn.recv(BUFSIZE)
+        with open(fullpath, 'rb') as f:
+            conn.sendall(f.read())
+    except Exception as e:
+        info = '# ' + str(e).replace('\n',' ')
+        conn.sendall(('Content-Length:' + str(len(info))).encode(encoding))
+        conn.recv(BUFSIZE)
+        conn.sendall(info.encode(encoding))
+        pass
 
 def delfile(fullpath):
     try:

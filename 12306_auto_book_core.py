@@ -11,6 +11,7 @@ import datetime
 import json
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import os
 import pygame
 import re
 import random
@@ -1195,7 +1196,48 @@ def task():
     println('扫描抢票任务开始...')
     global local_ip
     local_ip = getip()
+    c_jobs = []
     filename='config/booking_core.txt'
+    try:
+        println('get canceltask...')
+        clt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clt.connect(('39.96.21.111', 12306))
+        clt.send('getcanceltask'.encode(encoding))
+        resp = bytes.decode(clt.recv(1024), encoding)
+        if resp.startswith('taskinfo'):
+            resp = resp[9:].replace('\n','|')
+            if len(resp) > 0:
+                log('获取取消抢票任务信息成功！')
+                c_jobs = resp.split('|')
+#                    if cancel_key in jobs:
+#                        flag = True
+#                        thread_list.update({info_key : False})
+#                        println('取消抢票任务-->' + info_key)
+#                        cmdTxt = 'delcanceltask:' + jobs[0]
+#                        client.sendall(cmdTxt.encode(encoding))
+            else:
+                log('未发现取消抢票任务...')
+        else:
+            log('未发现取消抢票任务...')
+        if task_src == 'net':
+            log('获取服务器共享抢票任务...')
+                # 检查是否有退出任务
+            f_name = 'config/net_booking_core.txt'
+            clt.send('getfile:config/booking_core.txt'.encode(encoding))
+            while True:
+                resp = bytes.decode(clt.recv(1024), encoding)
+                if resp.startswith('Content-Length:'):
+                    clt.send(resp[15:].encode(encoding))
+                    resp = clt.recv(int(resp[15:]))
+                    with open(f_name, 'wb') as fp:
+                        fp.write(resp)
+                    log('获取服务器共享抢票任务成功！')
+                    break
+            if os.path.exists(f_name):
+                filename = f_name
+        clt.close()
+    except:
+        pass    
     fp = codecs.open(filename,'r', encoding='UTF-8')
     booking = fp.readlines()
     fp.close()
@@ -1220,26 +1262,10 @@ def task():
             if key == info_key:
                 flag = True
                 break
-        # 检查是否有退出任务
-        try:
-            println('get canceltask...')
-            client.send('getcanceltask'.encode(encoding))
-            resp = bytes.decode(client.recv(1024), encoding)
-            if resp.startswith('taskinfo'):
-                resp = resp[9:]
-                if len(resp) > 0:
-                    print('获取取消抢票任务信息成功！')
-                    jobs = resp.split('|')
-                    if cancel_key in jobs:
-                        flag = True
-                        thread_list.update({info_key : False})
-                        println('取消抢票任务-->' + info_key)
-                        cmdTxt = 'delcanceltask:' + jobs[0]
-                        client.sendall(cmdTxt.encode(encoding))
-                else:
-                    print('未发现取消抢票任务...')
-        except:
-            pass
+        if cancel_key in c_jobs:
+            flag = True
+            thread_list.update({info_key : False})
+            println('取消抢票任务-->' + info_key)
         cddt_tra_flag = False
         for key in cddt_trains:
 #            print(key)
@@ -1354,6 +1380,7 @@ ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
+task_src = 'net'
 
 if __name__ == '__main__':
     while True:
