@@ -74,6 +74,9 @@ def getip():
         return ip[0]
     else:
         return ''
+    
+def string_toTimestamp(str_dt):
+    return int(time.mktime(time.strptime(str_dt, "%Y-%m-%d %H:%M")))
 
 class Leftquery(object):
     '''余票查询'''
@@ -811,6 +814,10 @@ def order(bkInfo):
                 time.sleep((60 - now.minute) * 60 - now.second + 5)
             else:
                 break
+        if string_toTimestamp(bkInfo.expired) < int(time.time()):
+            println('[' + threading.current_thread().getName() + ']: 抢票任务已过期，当前线程退出...')
+            res['status'] = True
+            break
         info_key = bkInfo.uuid + '-' + from_station + '-' + to_station
         if thread_list[info_key] == False:
             cddt_trains.pop(info_key)
@@ -1115,7 +1122,7 @@ def run(bkInfo):
             println('第【'+ str(n) +'】次失败重试中...')
            
 class BookingInfo(object):
-    def __init__(self, bno, group ,rank, realname, username, password, from_station, to_station, dates, passengers_name, passengers_id_no, candidate_trains, candidate_seats, email, set_out, arrival, cddt_train_types):
+    def __init__(self, bno, group ,rank, realname, username, password, from_station, to_station, dates, passengers_name, passengers_id_no, candidate_trains, candidate_seats, email, set_out, arrival, expired, cddt_train_types):
         # 账号
         self.uuid = bno + '-' + dates
         
@@ -1149,6 +1156,8 @@ class BookingInfo(object):
         self.min_set_out_time = set_out
         # 最晚到达时间
         self.max_arrival_time = arrival
+        # 任务过期时间
+        self.expired = expired
         # 火车类型['G','D','K']
         self.cddt_train_types = cddt_train_types.split(',')
 
@@ -1250,7 +1259,7 @@ def task():
         if info_str.find('#') == 0:
             continue
         info = info_str.split('|')
-        bkInfo = BookingInfo(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13], info[14], info[15], info[16])
+        bkInfo = BookingInfo(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13], info[14], info[15], info[16], info[17])
 #        run(bkInfo)
         info_key = bkInfo.uuid + '-' + bkInfo.from_station + '-' + bkInfo.to_station
         str_dates = ''
@@ -1269,6 +1278,10 @@ def task():
             flag = True
             thread_list.update({info_key : False})
             println('取消抢票任务-->' + info_key)
+        if string_toTimestamp(bkInfo.expired) < int(time.time()):
+            flag = True
+            thread_list.update({info_key : False})
+            println('任务过期，取消任务-->' + info_key)
         cddt_tra_flag = False
         for key in cddt_trains:
 #            print(key)
