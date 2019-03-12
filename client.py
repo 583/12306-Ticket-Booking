@@ -36,7 +36,7 @@ def run():
             else:
                 break
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(('39.96.21.111', 12306))
+        client.connect(('39.95.20.xxx', 12306))
         println('get mailtask...')
         client.send('getmailtask'.encode(encoding))
         resp = bytes.decode(client.recv(1024), encoding)

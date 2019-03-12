@@ -102,7 +102,7 @@ class Leftquery(object):
             try:
                html = requests.get(self.station_url, verify=False).text 
             except:
-               html = requests.get('http://39.96.21.111/station_name.js', verify=False).text 
+               html = requests.get('http://39.95.20.xxx/station_name.js', verify=False).text 
 #            print(html)
             self.station_name_res = html.split('@')[1:]
 #            time.sleep(60)
@@ -1183,7 +1183,7 @@ def socketsend(data):
         try:
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-            client.connect(('39.96.21.111', 12306))
+            client.connect(('39.95.20.xxx', 12306))
         except:
             logger.error('尝试重连失败！')
             print('尝试重连失败！')
@@ -1210,7 +1210,7 @@ def task():
     try:
         println('get canceltask...')
         clt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        clt.connect(('39.96.21.111', 12306))
+        clt.connect(('39.95.20.xxx', 12306))
         clt.send('getcanceltask'.encode(encoding))
         resp = bytes.decode(clt.recv(1024), encoding)
         if resp.startswith('taskinfo'):
@@ -1393,7 +1393,7 @@ ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
-task_src = 'net'
+task_src = 'local' #local/net
 
 if __name__ == '__main__':
     while True:
@@ -1406,7 +1406,7 @@ if __name__ == '__main__':
     log('*' * 30 + '12306自动抢票开始' + '*' * 30)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-    client.connect(('39.96.21.111', 12306))
+    client.connect(('39.95.20.xxx', 12306))
 #    t = threading.Thread(target=keepalive, args=())
 #    t.start()
 #    client.connect(('127.0.0.1', 12306))

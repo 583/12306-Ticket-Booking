@@ -102,7 +102,7 @@ class Leftquery(object):
             try:
                html = requests.get(self.station_url, verify=False).text 
             except:
-               html = requests.get('http://39.96.21.111/station_name.js', verify=False).text 
+               html = requests.get('http://39.95.20.xxx/station_name.js', verify=False).text 
 #            print(html)
             self.station_name_res = html.split('@')[1:]
 #            time.sleep(60)
@@ -830,7 +830,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(0.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
+        st = round(random.uniform(1.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
@@ -1186,7 +1186,7 @@ def socketsend(data):
         try:
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-            client.connect(('39.96.21.111', 12306))
+            client.connect(('39.95.20.xxx', 12306))
         except:
             logger.error('尝试重连失败！')
             print('尝试重连失败！')
@@ -1213,7 +1213,7 @@ def task():
     try:
         println('get canceltask...')
         clt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        clt.connect(('39.96.21.111', 12306))
+        clt.connect(('39.95.20.xxx', 12306))
         clt.send('getcanceltask'.encode(encoding))
         resp = bytes.decode(clt.recv(1024), encoding)
         if resp.startswith('taskinfo'):
@@ -1396,7 +1396,7 @@ ticket_black_list_time = 180 # 小黑屋时间，单位s
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
-task_src = 'net'
+task_src = 'local' #local/net
 
 if __name__ == '__main__':
     while True:
@@ -1409,7 +1409,7 @@ if __name__ == '__main__':
     log('*' * 30 + '12306自动抢票开始' + '*' * 30)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-    client.connect(('39.96.21.111', 12306))
+    client.connect(('39.95.20.xxx', 12306))
 #    t = threading.Thread(target=keepalive, args=())
 #    t.start()
 #    client.connect(('127.0.0.1', 12306))
