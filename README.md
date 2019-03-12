@@ -18,9 +18,9 @@ Python3.6
 ### 运行截图
 运行日志<br><br>
 ![enter image description here](img/1.png)
-邮件信息<br><br>
+<br><br>邮件信息<br><br>
 ![enter image description here](img/2.png)
-12306订单信息<br><br>
+<br><br>12306订单信息<br><br>
 ![enter image description here](img/3.png)
 
 ### 使用说明
