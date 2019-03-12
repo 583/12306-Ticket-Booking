@@ -16,11 +16,11 @@
 Python3.6
 
 ### 运行截图
-<br>运行日志<br>
+运行日志<br><br>
 ![enter image description here](img/1.png)
-<br>邮件<br>
+邮件信息<br><br>
 ![enter image description here](img/2.png)
-<br>12306订单<br>
+12306订单信息<br><br>
 ![enter image description here](img/3.png)
 
 ### 使用说明
