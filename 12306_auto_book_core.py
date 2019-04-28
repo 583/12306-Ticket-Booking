@@ -102,7 +102,7 @@ class Leftquery(object):
             try:
                html = requests.get(self.station_url, verify=False).text 
             except:
-               html = requests.get('http://39.95.20.xxx/station_name.js', verify=False).text 
+               html = requests.get('http://' + server_ip + '/station_name.js', verify=False).text 
 #            print(html)
             self.station_name_res = html.split('@')[1:]
 #            time.sleep(60)
@@ -128,7 +128,8 @@ class Leftquery(object):
         try:
 #            proxie = "{'http': 'http://127.0.0.1:8580'}"
             q_res = requests.get(url, headers=self.headers, timeout=3, verify=False)
-#            print(q_res)
+            if q_res.status_code != 200:
+                return
             html = q_res.json()
 #            print(html)
             result = html['data']['result']
@@ -191,14 +192,19 @@ class Leftquery(object):
                 time_out_cdn.pop(host)
             return result
         except Exception as e:
-            if host != 'kyfw.12306.cn' and str(e).find('timeout') > -1:
+            if host != 'kyfw.12306.cn' and (str(e).find('timeout') > -1 or str(e).find('timed out') > -1):
                 if host in time_out_cdn:
                     time_out_cdn.update({host : int(time_out_cdn[host]) + 1})
                 else:
                     time_out_cdn.update({host : 1})
                 if int(time_out_cdn[host]) > 2:
                     cdn_list.remove(host)
-            println('查询余票信息异常: ' + str(e))
+                println('查询余票信息异常: time out!')
+            else:
+                if str(e).find('积极拒绝') > -1:
+                    println('查询余票信息异常: 目标计算机积极拒绝，无法连接。')
+                else:
+                    println('查询余票信息异常: ' + str(e))
 #            print(e)
 #            exit()
 
@@ -214,9 +220,11 @@ class Login(object):
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
         self.url_captcha = 'http://littlebigluo.qicp.net:47720/'
+        self.url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=z0nwCFNNFy&hashCode=Sonomt4GXxQ8y5nP8OKANN4uqj_LKFPbEeGZQpQSQLc&FMQw=0&q4f3=zh-CN&VySQ=FGF9QEe67lYGavdZicwJH4vsu9jHLwS5&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&lEnu=3232235621&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/68.0.3440.106%20Safari/537.36&E3gR=6ffe6a32e9af788920458ef31ceafe4a&timestamp='
         self.headers = {
             'Host': 'kyfw.12306.cn',
-            'Referer': 'https://kyfw.12306.cn/otn/login/init',
+            #'Referer': 'https://kyfw.12306.cn/otn/login/init',
+            'Referer': 'https://kyfw.12306.cn/otn/resources/login.html',
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
         }
 
@@ -229,6 +237,13 @@ class Login(object):
         plt.imshow(img)
         plt.axis('off')
         plt.show()
+
+    def get_rail_deviceid(self):
+        '''获取rail_deviceid'''
+        global req
+        html_rail_deviceid = req.get(self.url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
+        rail_deviceid = re.search(r'"dfp":"(.*?)"', html_rail_deviceid).group(1)
+        req.cookies['RAIL_DEVICEID'] = rail_deviceid
 
     def captcha(self, answer_num):
         '''填写验证码'''
@@ -251,23 +266,26 @@ class Login(object):
         form_check = {
             'answer': answer,
             'login_site': 'E',
-            'rand': 'sjrand'
+            'rand': 'sjrand',
+            '_': str(int(time.time() * 1000))
         }
         global req
-        html_check = req.post(self.url_check, data=form_check, headers=self.headers, verify=False).json()
+        html_check = req.get(self.url_check, params=form_check, headers=self.headers).json()
         println(html_check)
         if html_check['result_code'] == '4':
             println('验证码校验成功!')
+            return answer
         else:
             println('验证码校验失败!')
             exit()
 
-    def login(self, username, password):
+    def login(self, username, password, answer):
         '''登录账号'''
         form_login = {
             'username': username,
             'password': password,
-            'appid': 'otn'
+            'appid': 'otn',
+            'answer':answer
         }
         global req
         html_login = req.post(self.url_login, data=form_login, headers=self.headers, verify=False).json()
@@ -710,7 +728,8 @@ def pass_captcha():
     url_captcha = 'http://littlebigluo.qicp.net:47720/'
     headers = {
         'Host': 'kyfw.12306.cn',
-        'Referer': 'https://kyfw.12306.cn/otn/login/init',
+#        'Referer': 'https://kyfw.12306.cn/otn/login/init',
+        'Referer': 'https://kyfw.12306.cn/otn/resources/login.html',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
     }
     html_pic = req.get(url_pic, headers=headers, verify=False).content
@@ -931,14 +950,15 @@ def order(bkInfo):
                                 pass
                         # 填写验证码
                         login = Login()
+                        login.get_rail_deviceid()
                         answer_num = pass_captcha()
-#                        answer_num = input('请输入验证码(例:1,4):')
+#                        answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
                         if answer_num == None:
                             time.sleep(3)
                             continue
 #                       print(answer_num)
-                        login.captcha(answer_num)
-                        login.login(bkInfo.username, bkInfo.password)
+                        answer = login.captcha(answer_num)
+                        login.login(bkInfo.username, bkInfo.password, answer)
                         auth_res = order.auth()
 #                        if auth_res['status'] == True:
 #                            # 发送邮件提醒
@@ -1183,7 +1203,7 @@ def socketsend(data):
         try:
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-            client.connect(('39.95.20.xxx', 12306))
+            client.connect((server_ip, 12306))
         except:
             logger.error('尝试重连失败！')
             print('尝试重连失败！')
@@ -1210,7 +1230,7 @@ def task():
     try:
         println('get canceltask...')
         clt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        clt.connect(('39.95.20.xxx', 12306))
+        clt.connect((server_ip, 12306))
         clt.send('getcanceltask'.encode(encoding))
         resp = bytes.decode(clt.recv(1024), encoding)
         if resp.startswith('taskinfo'):
@@ -1394,6 +1414,7 @@ ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
 task_src = 'local' #local/net
+server_ip = '39.95.20.xxx'
 
 if __name__ == '__main__':
     while True:
@@ -1406,7 +1427,7 @@ if __name__ == '__main__':
     log('*' * 30 + '12306自动抢票开始' + '*' * 30)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-    client.connect(('39.95.20.xxx', 12306))
+    client.connect((server_ip, 12306))
 #    t = threading.Thread(target=keepalive, args=())
 #    t.start()
 #    client.connect(('127.0.0.1', 12306))
