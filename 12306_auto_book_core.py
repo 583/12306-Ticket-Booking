@@ -201,10 +201,19 @@ class Leftquery(object):
                     cdn_list.remove(host)
                 println('查询余票信息异常: time out!')
             else:
+                flag = False
                 if str(e).find('积极拒绝') > -1:
+                    flag = True
                     println('查询余票信息异常: 目标计算机积极拒绝，无法连接。')
-                else:
+                if str(e).find('timed out') > -1:
+                    flag = True
+                    println('查询余票信息异常: time out!')
+                if str(e).find('Max retries exceeded') > -1:
+                    flag = True
+                    println('查询余票信息异常: Max retries exceeded!')
+                if flag:
                     println('查询余票信息异常: ' + str(e))
+                    
 #            print(e)
 #            exit()
 
