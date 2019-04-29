@@ -1057,7 +1057,7 @@ def order(bkInfo):
                             if res['status'] != True:
                                 println(res['msg'])
                                 res.update({'msg' : res['msg']})
-                            if res['msg'].find('余票不足') > -1 and res['msg'].find('没有足够的票') > -1:
+                            if res['msg'].find('余票不足') > -1 or res['msg'].find('没有足够的票') > -1:
                                 println('下单异常，抢票当前任务退出...')
                                 # 发送邮件
                                 subject = '自助订票系统--任务取消通知'
