@@ -241,8 +241,8 @@ class Login(object):
         '''显示验证码图片'''
         global req
         html_pic = req.get(self.url_pic, headers=self.headers, verify=False).content
-        open('pic.jpg', 'wb').write(html_pic)
-        img = mpimg.imread('pic.jpg')
+        open('core_pic.jpg', 'wb').write(html_pic)
+        img = mpimg.imread('core_pic.jpg')
         plt.imshow(img)
         plt.axis('off')
         plt.show()
@@ -744,9 +744,9 @@ def pass_captcha():
     html_pic = req.get(url_pic, headers=headers, verify=False).content
     base64_str = base64.b64encode(html_pic).decode()
 #    print(base64_str)
-    open('pic.jpg', 'wb').write(html_pic)
+    open('core_pic.jpg', 'wb').write(html_pic)
     files = {
-        'pic_xxfile': open('pic.jpg', 'rb')
+        'pic_xxfile': open('core_pic.jpg', 'rb')
     }
     headers = {
         'Referer': url_captcha,
@@ -858,7 +858,7 @@ def order(bkInfo):
         n += 1
 #        st = round(random.uniform(0.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(0, len(booking_list) / 2.0), 2)
 #        st = 0
-        st = round(5 + random.uniform(0, 1), 2)
+        st = round(sleep_base + random.uniform(0, 1), 2)
 #        if len(cdn_list) < 3:
 #            st = 1
 #        st = round(st + random.uniform(0.5, len(booking_list)), 2)
@@ -933,7 +933,18 @@ def order(bkInfo):
                                             # 保证在区间内
                                             if t1 >= t2 and t3 <= t4 and (t3-t1) >= ts:
         #                                            print(info[3])
-                                                temp_trains_idx.append(num)
+                                                now = datetime.datetime.now()
+                                                departure = date == now.strftime('%Y-%m-%d')
+                                                if departure:
+                                                    # 当前时间 + free_time
+                                                    t5 = now.hour * 60 + now.minute + free_time
+                                                    if t5 < t1:
+                                                        temp_trains_idx.append(num)
+                                                else:
+                                                    temp_trains_idx.append(num)
+                                                
+                                                
+                                                
                     num += 1
                 if temp_trains_idx:
                     trains_idx.extend(temp_trains_idx)
@@ -961,9 +972,9 @@ def order(bkInfo):
                         login = Login()
                         login.get_rail_deviceid()
                         answer_num = pass_captcha()
-#                        answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
                         if answer_num == None:
                             time.sleep(3)
+#                            answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
                             continue
 #                       print(answer_num)
                         answer = login.captcha(answer_num)
@@ -1422,6 +1433,8 @@ ticket_black_list_time = 180
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
+sleep_base = 4
+free_time = 80 #min
 task_src = 'local' #local/net
 server_ip = '39.95.20.xxx'
 

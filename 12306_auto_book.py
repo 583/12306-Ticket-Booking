@@ -855,7 +855,7 @@ def order(bkInfo):
             res['status'] = True
             break
         n += 1
-        st = round(random.uniform(1.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(1, len(booking_list) / 2.0 + 1), 2)
+        st = round(random.uniform(1.2 * len(booking_list), (7 - int(bkInfo.rank)) / 2) + random.uniform(sleep_base, len(booking_list) / 2.0 + sleep_base), 2)
 #        st = 0
 #        if len(cdn_list) < 3:
 #            st = 1
@@ -931,7 +931,18 @@ def order(bkInfo):
                                             # 保证在区间内
                                             if t1 >= t2 and t3 <= t4 and (t3-t1) >= ts:
         #                                            print(info[3])
-                                                temp_trains_idx.append(num)
+                                                now = datetime.datetime.now()
+                                                departure = date == now.strftime('%Y-%m-%d')
+                                                if departure:
+                                                    print('当前为出发当天')
+                                                    # 当前时间 + free_time
+                                                    t5 = now.hour * 60 + now.minute + free_time
+                                                    print('t1: '+ str(t1))
+                                                    print('t5: '+ str(t5))
+                                                    if t5 < t1:
+                                                        temp_trains_idx.append(num)
+                                                else:
+                                                    temp_trains_idx.append(num)
                     num += 1
                 if temp_trains_idx:
                     trains_idx.extend(temp_trains_idx)
@@ -958,10 +969,10 @@ def order(bkInfo):
                         # 填写验证码
                         login = Login()
                         login.get_rail_deviceid()
-                        answer_num = pass_captcha()
-#                        answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
+                        answer_num = pass_captcha()         
                         if answer_num == None:
                             time.sleep(3)
+#                            answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
                             continue
 #                       print(answer_num)
                         answer = login.captcha(answer_num)
@@ -1422,6 +1433,8 @@ ticket_black_list_time = 180 # 小黑屋时间，单位s
 ticket_black_list = {}
 last_req_time = None
 lock = threading.Lock()
+free_time = 80 #min
+sleep_base = 0
 task_src = 'local' #local/net
 server_ip = '39.95.20.xxx'
 
