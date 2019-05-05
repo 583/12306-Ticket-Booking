@@ -229,7 +229,7 @@ class Login(object):
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
         self.url_captcha = 'http://littlebigluo.qicp.net:47720/'
-        self.url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=z0nwCFNNFy&hashCode=Sonomt4GXxQ8y5nP8OKANN4uqj_LKFPbEeGZQpQSQLc&FMQw=0&q4f3=zh-CN&VySQ=FGF9QEe67lYGavdZicwJH4vsu9jHLwS5&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&lEnu=3232235621&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/68.0.3440.106%20Safari/537.36&E3gR=6ffe6a32e9af788920458ef31ceafe4a&timestamp='
+        self.url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=vcpH2oJtig&hashCode=ky7w1WIRS_lRHDUUF32SCen2VU7BUhTG6w-SO3lhBNM&FMQw=1&q4f3=zh-CN&VySQ=FGGLk8I7DNBrIzFVtwGHgpXC-TRj7MXs&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&lEnu=3232235622&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='
         self.headers = {
             'Host': 'kyfw.12306.cn',
             #'Referer': 'https://kyfw.12306.cn/otn/login/init',
@@ -542,7 +542,7 @@ class Order(object):
         }
         global req
         html_checkorder = req.post(self.url_checkorder, data=form, headers=self.head_2, verify=False).json()
-        println(html_checkorder)
+#        println(html_checkorder)
         if html_checkorder['status'] == True:
             println('检查订单信息成功!')
         else:
@@ -569,7 +569,7 @@ class Order(object):
         }
         global req
         html_count = req.post(self.url_count, data=form, headers=self.head_2, verify=False).json()
-        println(html_count)
+#        println(html_count)
         if html_count['status'] == True:
 #            println('查询余票数量成功!')
             ticket = html_count['data']['ticket']
@@ -605,7 +605,7 @@ class Order(object):
         }
         global req
         html_confirm = req.post(self.url_confirm, data=form, headers=self.head_2, verify=False).json()
-        println(html_confirm)
+#        println(html_confirm)
         #  {'validateMessagesShowId': '_validatorMessage', 'status': True, 'httpstatus': 200, 'data': {'errMsg': '余票不足！', 'submitStatus': False}
         resDict = {}
         msg = ''
@@ -645,7 +645,7 @@ class Cancelorder(Login, Order):
         global req
         res = {'status': False}
         html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
-        println(html_orderinfo)
+#        println(html_orderinfo)
         if html_orderinfo['status'] == True:
 #            println('查询未完成订单成功!')
             try:
